@@ -486,9 +486,9 @@ bundle exec appraisal rake test
 Release a new version after CI passes:
 
 ```bash
-# Tag must match lib/solid_queue_guard/version.rb (currently 1.1.0)
-git tag v1.1.0
-git push origin v1.1.0
+# Tag must match lib/solid_queue_guard/version.rb (currently 1.1.1)
+git tag v1.1.1
+git push origin v1.1.1
 ```
 
 Trusted Publishing on RubyGems publishes automatically when the tag is pushed.
