@@ -49,7 +49,7 @@ Checks:
 ✅ Active Job adapter is :solid_queue
 ✅ Queue database configured in database.yml
 ✅ Solid Queue connects_to queue database (pool: 10)
-✅ db/queue_schema.rb exists
+✅ Solid Queue schema tables present
 ❌ Worker threads: 10, queue DB pool: 5
 ⚠️ No workers configured for "mailers" queue
 ⚠️ recurring.yml exists but scheduler may not run
@@ -76,7 +76,7 @@ Runs locally, in CI, or pre-deploy. **No extra infrastructure.**
 | **Adapter** | Active Job not set to `:solid_queue` |
 | **Queue database** | Missing `queue` entry in `database.yml` |
 | **connects_to** | Solid Queue pointing at the wrong DB / pool |
-| **Queue schema** | Missing `db/queue_schema.rb` |
+| **Queue schema** | Missing Solid Queue tables in schema files or queue database |
 | **Thread pool** | `threads` > available queue DB connections |
 | **Worker coverage** | Queues with no worker assigned |
 | **Scheduler** | `recurring.yml` tasks without a scheduler |
@@ -175,6 +175,153 @@ config.unhealthy_http_status = 503  # default
 ```
 
 Works with **Kamal**, **Heroku**, **Fly.io**, **ECS/Fargate**, **Kubernetes**, **Better Stack**, **UptimeRobot**.
+
+---
+
+## How to use it
+
+Solid Queue does not show up in Rails `/up`. **solid_queue_guard** gives you three operational surfaces:
+
+| Surface | Command / URL | Best for |
+| ------- | ------------- | -------- |
+| **Doctor** | `bin/rails solid_queue_guard:doctor` | Local pre-deploy, config review |
+| **CI gate** | `SOLID_QUEUE_GUARD_STRICT=1 bin/rails solid_queue_guard:doctor` | Block merges with broken queue config |
+| **HTTP health** | `GET /solid_queue_guard/health` | Production uptime monitors (Kamal, ECS, UptimeRobot) |
+
+**Mission Control** shows what is happening. **solid_queue_guard** warns what is dangerous. Use both.
+
+### Local and pre-deploy
+
+Run before changing `queue.yml`, `database.yml`, or recurring tasks:
+
+```bash
+bin/rails solid_queue_guard:doctor      # config checks (default scope)
+bin/rails solid_queue_guard:report      # config + runtime when the queue DB is available
+```
+
+By default the install generator sets `config.enabled = Rails.env.production?`, so in **development** checks are skipped unless you enable them:
+
+```ruby
+SolidQueueGuard.configure { |c| c.enabled = true }
+```
+
+Or run with production config locally when validating deploy readiness.
+
+### CI pipelines
+
+Validate **configuration** before deploy. Process/runtime checks usually **skip** in CI because there is no `bin/jobs` supervisor on the runner.
+
+```yaml
+- name: Solid Queue production readiness
+  run: SOLID_QUEUE_GUARD_STRICT=1 bin/rails solid_queue_guard:doctor
+```
+
+`STRICT=1` turns warnings into exit code `1`, so the pipeline fails on misconfigured pools, missing worker coverage, or missing schema tables — not only hard failures.
+
+Generate a starter workflow:
+
+```bash
+bin/rails generate solid_queue_guard:install:ci
+```
+
+### Production monitoring
+
+Mount the engine and point your load balancer or Kamal health check at `/solid_queue_guard/health`:
+
+```ruby
+# config/routes.rb
+mount SolidQueueGuard::Engine, at: "/solid_queue_guard"
+```
+
+Runtime checks matter here: queue lag, stale heartbeats, dispatcher health, and process topology reflect **live** Solid Queue state.
+
+Optional hardening:
+
+```ruby
+config.health_token = ENV["SOLID_QUEUE_GUARD_TOKEN"]
+config.health_cache_ttl = 15.seconds
+config.degraded_http_status = 207   # or :ok (200), 503, etc.
+config.notify_with = [:rails_logger, :slack]
+```
+
+### Typical flow
+
+```text
+Developer          CI                    Production
+    │               │                         │
+    │ doctor        │ doctor --strict           │ GET /health (every 30–60s)
+    ▼               ▼                         ▼
+ "pool wrong?"   block bad deploy          alert: worker dead
+ "schema ok?"    before merge              alert: queue lag
+```
+
+---
+
+## Runtime process checks
+
+Runtime checks query the **queue database** (via `SolidQueue::Record`). If `connects_to` is missing or the DB is unreachable, they **skip** — they do not pass silently as healthy.
+
+### `process_topology` — are the expected roles present?
+
+Reads distinct `kind` values from `solid_queue_processes`:
+
+| Kind | Role |
+| ---- | ---- |
+| `Supervisor` | Parent process (`bin/jobs`) |
+| `Worker` | Consumes ready jobs |
+| `Dispatcher` | Moves scheduled jobs to ready |
+| `Scheduler` | Runs recurring tasks |
+
+| Result | Meaning |
+| ------ | ------- |
+| ⚠️ No processes | Nothing registered — supervisor not running |
+| ⚠️ No Worker | Jobs will not be processed |
+| ⚠️ No Dispatcher | Scheduled work may stall (when recurring/scheduled jobs exist) |
+| ✅ Pass | Expected kinds are present |
+
+This check looks at **presence of records**, not heartbeat freshness.
+
+### `stale_process` — are heartbeats fresh?
+
+Finds processes where `last_heartbeat_at` is older than `stale_process_threshold` (default **5 minutes**):
+
+| Result | Meaning |
+| ------ | ------- |
+| ✅ Pass | All processes reported recently |
+| ❌ Fail | One or more workers/dispatchers look dead or stuck |
+
+Use this in production health to catch workers that died after deploy.
+
+### `pidfile` — optional supervisor liveness
+
+When `tmp/pids/solid_queue.pid` (or `SOLID_QUEUE_PIDFILE`) exists, verifies the PID is alive. Often **warns in development** where `bin/jobs` is not running. Disable if you do not use pidfiles:
+
+```ruby
+config.disabled_checks = [:pidfile]
+```
+
+### `puma_plugin_runtime` — Solid Queue inside Puma
+
+When `plugin :solid_queue` is in `config/puma.rb`, verifies active processes with recent heartbeats exist. **Skips** when the Puma plugin is not enabled.
+
+### Queue schema detection
+
+`QueueSchemaCheck` does **not** require `db/queue_schema.rb`. It validates that all tables for your installed **solid_queue** version exist in any of:
+
+- `db/queue_schema.rb`
+- `db/schema.rb`
+- `db/structure.sql`
+- the connected queue database
+
+Apps that keep Solid Queue tables only in `structure.sql` (common in Revelo-style repos) pass correctly.
+
+### Where each check type applies
+
+| Context | Config checks | Process / runtime checks |
+| ------- | ------------- | ------------------------ |
+| Local `doctor` | ✅ Primary value | ⚠️ Partial without `bin/jobs` |
+| CI `--strict` | ✅ Primary value | ⏭️ Usually skip |
+| Production `/health` | ✅ When DB up | ✅ Primary value |
 
 ---
 
