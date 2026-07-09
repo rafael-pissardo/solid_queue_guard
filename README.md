@@ -67,7 +67,7 @@ One command. Actionable output. No Datadog required to get started.
 
 ## What it checks
 
-### v0.1 — Configuration doctor (available now)
+### Configuration doctor
 
 Runs locally, in CI, or pre-deploy. **No extra infrastructure.**
 
@@ -83,8 +83,10 @@ Runs locally, in CI, or pre-deploy. **No extra infrastructure.**
 | **Env flags** | `SOLID_QUEUE_SKIP_RECURRING=true` in production |
 | **Heartbeats** | Default thresholds that may not fit your deploy |
 | **Puma plugin** | Solid Queue co-located with web in production |
+| **Async supervisor** | `async` mode with thread/pool sizing risks |
+| **Topology** | `queue.yml` worker and pool recommendations |
 
-### v0.2+ — Runtime guards (roadmap)
+### Runtime guards
 
 | Check | Catches |
 | ----- | ------- |
@@ -93,6 +95,7 @@ Runs locally, in CI, or pre-deploy. **No extra infrastructure.**
 | **Dispatcher health** | Scheduled jobs never becoming ready |
 | **Blocked jobs** | Concurrency control silently holding jobs |
 | **Recurring staleness** | Cron tasks that stopped firing |
+| **Puma plugin runtime** | Plugin enabled but no active Solid Queue processes |
 | **HTTP `/health`** | Kamal, ECS, K8s, UptimeRobot integration |
 
 ---
@@ -104,6 +107,7 @@ Runs locally, in CI, or pre-deploy. **No extra infrastructure.**
 ```bash
 bundle add solid_queue_guard
 bin/rails solid_queue_guard:install
+bin/rails generate solid_queue_guard:install:ci   # optional GitHub Actions workflow
 ```
 
 ### Run the doctor
@@ -138,6 +142,12 @@ Perfect for deploy pipelines:
   run: SOLID_QUEUE_GUARD_STRICT=1 bin/rails solid_queue_guard:doctor
 ```
 
+Or generate a workflow:
+
+```bash
+bin/rails generate solid_queue_guard:install:ci
+```
+
 ### HTTP health
 
 ```ruby
@@ -155,6 +165,13 @@ Optional token protection:
 ```ruby
 config.health_token = ENV["SOLID_QUEUE_GUARD_TOKEN"]
 # curl -H "X-Solid-Queue-Guard-Token: $TOKEN" ...
+```
+
+HTTP status policy (for Kamal, ECS, load balancers):
+
+```ruby
+config.degraded_http_status = 207   # or :ok (200), 503, etc.
+config.unhealthy_http_status = 503  # default
 ```
 
 Works with **Kamal**, **Heroku**, **Fly.io**, **ECS/Fargate**, **Kubernetes**, **Better Stack**, **UptimeRobot**.
@@ -177,10 +194,43 @@ SolidQueueGuard.configure do |config|
   config.failed_jobs_threshold = 20
   config.stale_process_threshold = 5.minutes
 
-  # config.health_token = ENV["SOLID_QUEUE_GUARD_TOKEN"]  # v0.2
-  # config.notify_with = [:rails_logger, :slack]          # v0.3
+  # Per-check overrides (v0.6+)
+  config.disabled_checks = [:pidfile]
+  config.checks.queue_lag = { threshold: 10.minutes }
+  config.checks.failed_jobs = { threshold: 5, enabled: true }
+
+  # HTTP status policy (v0.8+)
+  # config.degraded_http_status = 207
+  # config.unhealthy_http_status = 503
+
+  # config.health_token = ENV["SOLID_QUEUE_GUARD_TOKEN"]
+  # config.integrate_rails_health = true
+  # config.notify_with = [:rails_logger, :slack, :datadog, :webhook]
+  # config.metrics_backends = [:statsd, :prometheus, :opentelemetry]
 end
 ```
+
+---
+
+## Public API (v1.0+)
+
+The following surface is **stable** until `2.0` and follows [semantic versioning](https://semver.org/):
+
+| API | Description |
+| --- | ----------- |
+| `SolidQueueGuard.configure` | Block-style configuration |
+| `SolidQueueGuard.config` | Current configuration object |
+| `SolidQueueGuard.enabled?` | Whether checks run |
+| `solid_queue_guard:doctor` | Config readiness report |
+| `solid_queue_guard:health` | Runtime health report |
+| `solid_queue_guard:report` | Full diagnostic report |
+| `solid_queue_guard:install` | Initializer generator |
+| `solid_queue_guard:install:ci` | GitHub Actions workflow generator |
+| `mount SolidQueueGuard::Engine` | HTTP health endpoint |
+
+Configuration attributes, rake tasks, and health JSON shape are public. Internal check classes and registry are `@api private`.
+
+Breaking changes ship only in major versions (`2.0+`). Deprecations warn one minor version ahead.
 
 ---
 
@@ -192,9 +242,9 @@ end
 | **UI** | Dashboard | CLI + JSON + health endpoint |
 | **Retry / discard** | Yes | No (use Mission Control) |
 | **Config doctor** | No | Yes |
-| **Queue lag alerts** | No | Yes (v0.2) |
+| **Queue lag alerts** | No | Yes |
 | **Pre-deploy checks** | No | Yes |
-| **Recurring job guard** | Manual inspection | Automatic (v0.2) |
+| **Recurring job guard** | Manual inspection | Automatic |
 
 **Use both.** They solve different problems.
 
@@ -202,13 +252,17 @@ end
 
 ## Roadmap
 
-| Version | Ships |
-| ------- | ----- |
+| Version | Ships | Status |
+| ------- | ----- | ------ |
 | **v0.1** | `doctor` — config checks, CI integration, install generator | ✅ Released |
 | **v0.2** | Runtime health, queue lag, dispatcher/blocked jobs, HTTP endpoint | ✅ Released |
 | **v0.3** | Slack, Datadog, webhook notifications | ✅ Released |
 | **v0.4** | StatsD, Prometheus, OpenTelemetry metrics | ✅ Released |
 | **v0.5** | Auto-recommendations for `queue.yml` topology | ✅ Released |
+| **v0.6** | Per-check configuration (`disabled_checks`, `config.checks`) | ✅ Released |
+| **v0.7** | Puma plugin runtime check, async supervisor awareness | ✅ Released |
+| **v0.8** | HTTP status policy, `install:ci` generator | ✅ Released |
+| **v1.0** | Stable public API, strict semver | ✅ Released |
 
 ---
 
@@ -216,8 +270,9 @@ end
 
 | Gem version | Ruby | Rails |
 | ----------- | ---- | ----- |
-| 0.1.x       | 3.1+ | 7.1, 7.2, 8.0 |
+| 1.0.x       | 3.1+ | 7.1, 7.2, 8.0 |
 | 0.5.x       | 3.1+ | 7.1, 7.2, 8.0 |
+| 0.1.x       | 3.1+ | 7.1, 7.2, 8.0 |
 
 ## Requirements
 
@@ -239,6 +294,8 @@ bundle exec rubocop
 bundle exec appraisal install
 bundle exec appraisal rake test
 ```
+
+Release a new version by pushing a `v*` tag after CI passes (Trusted Publishing on RubyGems).
 
 ---
 
