@@ -29,5 +29,25 @@ module SolidQueueGuard
         end
       end
     end
+
+    initializer 'solid_queue_guard.mission_control' do
+      next unless SolidQueueGuard.config.integrate_mission_control
+
+      config.after_initialize do
+        if defined?(::MissionControl::Jobs)
+          SolidQueueGuard::MissionControl::Integration.install!
+        else
+          Rails.logger.warn(
+            '[solid_queue_guard] integrate_mission_control is enabled but mission_control-jobs is not loaded'
+          )
+        end
+      end
+
+      config.to_prepare do
+        next unless defined?(::MissionControl::Jobs)
+
+        SolidQueueGuard::MissionControl::Integration.install_navigation!
+      end
+    end
   end
 end

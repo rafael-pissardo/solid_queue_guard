@@ -22,6 +22,7 @@ SolidQueueGuard.configure do |config|
 
   # config.health_token = ENV["SOLID_QUEUE_GUARD_TOKEN"]
   # config.integrate_rails_health = true
+  # config.integrate_mission_control = true
   # config.notify_with = [:rails_logger, :slack, :datadog, :webhook]
   # config.metrics_backends = [:statsd, :prometheus, :opentelemetry]
 end

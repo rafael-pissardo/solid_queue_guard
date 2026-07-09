@@ -11,6 +11,7 @@ module SolidQueueGuard
                   :health_cache_ttl,
                   :scheduled_backlog_threshold,
                   :integrate_rails_health,
+                  :integrate_mission_control,
                   :notify_with,
                   :metrics_backends,
                   :disabled_checks,
@@ -28,6 +29,7 @@ module SolidQueueGuard
       @health_cache_ttl = 15.seconds
       @scheduled_backlog_threshold = 100
       @integrate_rails_health = false
+      @integrate_mission_control = false
       @notify_with = [:rails_logger]
       @metrics_backends = []
       @disabled_checks = []

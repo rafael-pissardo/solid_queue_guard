@@ -1,0 +1,75 @@
+<% navigation(title: "Guard", section: :guard) %>
+
+<div class="level mb-5">
+  <div class="level-left">
+    <div class="level-item">
+      <h2 class="title is-4 mb-0">
+        Overall status
+        <%= guard_status_tag(@payload[:status]) %>
+      </h2>
+    </div>
+  </div>
+</div>
+
+<%= render "solid_queue_guard/mission_control/dashboard/summary_metrics", payload: @payload %>
+
+<% if @payload[:warnings].present? %>
+  <article class="message is-warning mt-5">
+    <div class="message-header">
+      <p>Warnings</p>
+    </div>
+    <div class="message-body">
+      <ul>
+        <% @payload[:warnings].each do |warning| %>
+          <li><%= warning %></li>
+        <% end %>
+      </ul>
+    </div>
+  </article>
+<% end %>
+
+<% if @payload[:suggestions].present? %>
+  <article class="message is-info mt-5">
+    <div class="message-header">
+      <p>Suggested fixes</p>
+    </div>
+    <div class="message-body">
+      <ul>
+        <% @payload[:suggestions].each do |suggestion| %>
+          <li><%= suggestion %></li>
+        <% end %>
+      </ul>
+    </div>
+  </article>
+<% end %>
+
+<% if @payload[:recommendations].present? %>
+  <article class="message is-link mt-5">
+    <div class="message-header">
+      <p>Topology recommendations</p>
+    </div>
+    <div class="message-body">
+      <ul>
+        <% @payload[:recommendations].each do |recommendation| %>
+          <li><%= recommendation %></li>
+        <% end %>
+      </ul>
+    </div>
+  </article>
+<% end %>
+
+<table class="guard-checks table is-hoverable is-fullwidth mt-5">
+  <thead>
+    <tr>
+      <th>Check</th>
+      <th>Status</th>
+      <th>Message</th>
+      <th>Suggestion</th>
+    </tr>
+  </thead>
+  <tbody>
+    <%= render partial: "solid_queue_guard/mission_control/dashboard/check",
+               collection: @payload[:checks],
+               as: :check %>
+  </tbody>
+</table>

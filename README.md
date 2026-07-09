@@ -176,17 +176,52 @@ config.unhealthy_http_status = 503  # default
 
 Works with **Kamal**, **Heroku**, **Fly.io**, **ECS/Fargate**, **Kubernetes**, **Better Stack**, **UptimeRobot**.
 
+### Mission Control dashboard (opt-in)
+
+Add a **Guard** tab to [Mission Control — Jobs](https://github.com/rails/mission_control-jobs) — same Bulma UI, same auth, same navigation:
+
+```ruby
+# Gemfile
+gem "mission_control-jobs"
+gem "solid_queue_guard"
+
+# config/initializers/solid_queue_guard.rb
+SolidQueueGuard.configure do |config|
+  config.integrate_mission_control = true
+end
+
+# config/routes.rb
+mount MissionControl::Jobs::Engine, at: "/jobs"
+mount SolidQueueGuard::Engine, at: "/solid_queue_guard" # keep /health for probes
+```
+
+Open `/jobs/guard` (or click the **Guard** tab inside Mission Control). The page shows:
+
+| Section | Content |
+| ------- | ------- |
+| **Overall status** | `healthy` / `degraded` / `unhealthy` badge |
+| **Metrics** | Queue lag, failed jobs (1h), dead processes, check count |
+| **Warnings & suggestions** | Same messages as `doctor` / `/health` |
+| **Checks table** | Every check with status tag, message, and suggestion |
+
+**Authentication:** the Guard tab inherits Mission Control auth — HTTP basic (default) or your admin controller via `MissionControl::Jobs.base_controller_class`. No separate login.
+
+**Load balancers:** keep using `GET /solid_queue_guard/health` with optional `health_token`. Probes do not go through Mission Control.
+
+**Requirements:** an asset pipeline (Propshaft or Sprockets), same as Mission Control. `mission_control-jobs` is optional — only needed when `integrate_mission_control` is enabled.
+
 ---
 
 ## How to use it
 
-Solid Queue does not show up in Rails `/up`. **solid_queue_guard** gives you three operational surfaces:
+Solid Queue does not show up in Rails `/up`. **solid_queue_guard** gives you four operational surfaces:
 
 | Surface | Command / URL | Best for |
 | ------- | ------------- | -------- |
 | **Doctor** | `bin/rails solid_queue_guard:doctor` | Local pre-deploy, config review |
 | **CI gate** | `SOLID_QUEUE_GUARD_STRICT=1 bin/rails solid_queue_guard:doctor` | Block merges with broken queue config |
 | **HTTP health** | `GET /solid_queue_guard/health` | Production uptime monitors (Kamal, ECS, UptimeRobot) |
+| **Guard tab** | `GET /jobs/guard` (with `integrate_mission_control`) | Human-readable checks inside Mission Control |
 
 **Mission Control** shows what is happening. **solid_queue_guard** warns what is dangerous. Use both.
 
@@ -352,6 +387,7 @@ SolidQueueGuard.configure do |config|
 
   # config.health_token = ENV["SOLID_QUEUE_GUARD_TOKEN"]
   # config.integrate_rails_health = true
+  # config.integrate_mission_control = true  # Guard tab in Mission Control (requires mission_control-jobs)
   # config.notify_with = [:rails_logger, :slack, :datadog, :webhook]
   # config.metrics_backends = [:statsd, :prometheus, :opentelemetry]
 end
@@ -374,8 +410,10 @@ The following surface is **stable** until `2.0` and follows [semantic versioning
 | `solid_queue_guard:install` | Initializer generator |
 | `solid_queue_guard:install:ci` | GitHub Actions workflow generator |
 | `mount SolidQueueGuard::Engine` | HTTP health endpoint |
+| `config.integrate_mission_control` | Guard tab in Mission Control (opt-in, requires `mission_control-jobs`) |
+| `GET /jobs/guard` | Human-readable health dashboard (when integration enabled) |
 
-Configuration attributes, rake tasks, and health JSON shape are public. Internal check classes and registry are `@api private`.
+Configuration attributes, rake tasks, health JSON shape, and Mission Control integration are public. Internal check classes and registry are `@api private`.
 
 Breaking changes ship only in major versions (`2.0+`). Deprecations warn one minor version ahead.
 
@@ -386,7 +424,7 @@ Breaking changes ship only in major versions (`2.0+`). Deprecations warn one min
 | | [Mission Control — Jobs](https://github.com/rails/mission_control-jobs) | solid_queue_guard |
 | --- | --- | --- |
 | **Purpose** | Inspect & manage jobs | Detect production risk |
-| **UI** | Dashboard | CLI + JSON + health endpoint |
+| **UI** | Dashboard | CLI + JSON + health endpoint + optional Guard tab in Mission Control |
 | **Retry / discard** | Yes | No (use Mission Control) |
 | **Config doctor** | No | Yes |
 | **Queue lag alerts** | No | Yes |
@@ -410,6 +448,7 @@ Breaking changes ship only in major versions (`2.0+`). Deprecations warn one min
 | **v0.7** | Puma plugin runtime check, async supervisor awareness | ✅ Released |
 | **v0.8** | HTTP status policy, `install:ci` generator | ✅ Released |
 | **v1.0** | Stable public API, strict semver | ✅ Released |
+| **v1.1** | Mission Control Guard tab (opt-in) | ✅ Released |
 
 ---
 
@@ -417,6 +456,7 @@ Breaking changes ship only in major versions (`2.0+`). Deprecations warn one min
 
 | Gem version | Ruby | Rails |
 | ----------- | ---- | ----- |
+| 1.1.x       | 3.1+ | 7.1, 7.2, 8.0 |
 | 1.0.x       | 3.1+ | 7.1, 7.2, 8.0 |
 | 0.5.x       | 3.1+ | 7.1, 7.2, 8.0 |
 | 0.1.x       | 3.1+ | 7.1, 7.2, 8.0 |
@@ -426,6 +466,7 @@ Breaking changes ship only in major versions (`2.0+`). Deprecations warn one min
 - Ruby >= 3.1
 - Rails >= 7.1, < 9.0
 - [solid_queue](https://github.com/rails/solid_queue) >= 1.0, < 2.0
+- [mission_control-jobs](https://github.com/rails/mission_control-jobs) >= 1.0 — optional, only for `integrate_mission_control`
 
 ---
 
@@ -442,7 +483,15 @@ bundle exec appraisal install
 bundle exec appraisal rake test
 ```
 
-Release a new version by pushing a `v*` tag after CI passes (Trusted Publishing on RubyGems).
+Release a new version after CI passes:
+
+```bash
+# Tag must match lib/solid_queue_guard/version.rb (currently 1.1.0)
+git tag v1.1.0
+git push origin v1.1.0
+```
+
+Trusted Publishing on RubyGems publishes automatically when the tag is pushed.
 
 ---
 

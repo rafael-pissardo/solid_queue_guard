@@ -15,4 +15,5 @@ Rails.application.configure do
   config.active_job.queue_adapter = :solid_queue
   config.solid_queue.connects_to = { database: { writing: :queue } }
   config.solid_queue.logger = ActiveSupport::Logger.new(nil)
+  config.solid_queue_guard.integrate_mission_control = true
 end

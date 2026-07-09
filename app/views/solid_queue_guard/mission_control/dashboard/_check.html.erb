@@ -1,0 +1,6 @@
+<tr class="guard-check">
+  <td><%= guard_check_label(check) %></td>
+  <td><%= guard_status_tag(check[:status]) %></td>
+  <td><%= check[:message] %></td>
+  <td class="has-text-grey"><%= check[:suggestion].presence || "—" %></td>
+</tr>

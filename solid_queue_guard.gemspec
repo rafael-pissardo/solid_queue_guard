@@ -45,7 +45,9 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'appraisal', '~> 2.5'
   spec.add_development_dependency 'debug'
   spec.add_development_dependency 'minitest', '~> 5.0'
+  spec.add_development_dependency 'mission_control-jobs', '>= 1.0'
   spec.add_development_dependency 'mocha', '>= 2.1'
+  spec.add_development_dependency 'propshaft', '>= 1.0'
   spec.add_development_dependency 'puma', '>= 6.0'
   spec.add_development_dependency 'rails', rails_version
   spec.add_development_dependency 'rubocop', '~> 1.75'

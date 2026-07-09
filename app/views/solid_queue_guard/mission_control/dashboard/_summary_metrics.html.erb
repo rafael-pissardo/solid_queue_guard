@@ -1,0 +1,29 @@
+<div class="columns is-multiline">
+  <div class="column is-one-quarter">
+    <div class="box has-text-centered">
+      <p class="heading">Queue lag</p>
+      <p class="title is-5"><%= guard_format_duration(payload[:queue_lag_seconds]) %></p>
+    </div>
+  </div>
+
+  <div class="column is-one-quarter">
+    <div class="box has-text-centered">
+      <p class="heading">Failed jobs (1h)</p>
+      <p class="title is-5"><%= guard_metric_value(payload[:failed_jobs_last_hour]) %></p>
+    </div>
+  </div>
+
+  <div class="column is-one-quarter">
+    <div class="box has-text-centered">
+      <p class="heading">Dead processes</p>
+      <p class="title is-5"><%= guard_metric_value(payload[:dead_processes]) %></p>
+    </div>
+  </div>
+
+  <div class="column is-one-quarter">
+    <div class="box has-text-centered">
+      <p class="heading">Checks</p>
+      <p class="title is-5"><%= payload[:checks].size %></p>
+    </div>
+  </div>
+</div>
