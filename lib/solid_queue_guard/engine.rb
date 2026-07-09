@@ -31,9 +31,9 @@ module SolidQueueGuard
     end
 
     initializer 'solid_queue_guard.mission_control' do
-      next unless SolidQueueGuard.config.integrate_mission_control
-
       config.after_initialize do
+        next unless SolidQueueGuard.config.integrate_mission_control
+
         if defined?(::MissionControl::Jobs)
           SolidQueueGuard::MissionControl::Integration.install!
         else
@@ -44,6 +44,7 @@ module SolidQueueGuard
       end
 
       config.to_prepare do
+        next unless SolidQueueGuard.config.integrate_mission_control
         next unless defined?(::MissionControl::Jobs)
 
         SolidQueueGuard::MissionControl::Integration.install_navigation!
