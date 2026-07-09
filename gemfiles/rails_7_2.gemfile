@@ -2,7 +2,7 @@
 
 source "https://rubygems.org"
 
-gem "parallel", "< 2.1"
+gem "parallel", "~> 1.26"
 gem "rails", "~> 7.2.0"
 
 gemspec path: "../"

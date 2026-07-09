@@ -171,7 +171,7 @@ GEM
       racc (~> 1.4)
     nokogiri (1.19.4-x86_64-linux-musl)
       racc (~> 1.4)
-    parallel (2.0.1)
+    parallel (1.28.0)
     parser (3.3.11.1)
       ast (~> 2.4.1)
       racc
@@ -303,7 +303,7 @@ DEPENDENCIES
   debug
   minitest (~> 5.0)
   mocha (>= 2.1)
-  parallel (< 2.1)
+  parallel (~> 1.26)
   puma (>= 6.0)
   rails (~> 7.1.0)
   rubocop (~> 1.75)
