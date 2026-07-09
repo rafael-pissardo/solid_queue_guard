@@ -1,0 +1,74 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby: ["3.2", "3.3", "3.4"]
+        gemfile:
+          - gemfiles/rails_7_1.gemfile
+          - gemfiles/rails_7_2.gemfile
+          - gemfiles/rails_8_0.gemfile
+    env:
+      BUNDLE_GEMFILE: ${{ matrix.gemfile }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+          cache-version: ${{ matrix.gemfile }}-${{ matrix.ruby }}
+
+      - name: Run tests
+        run: bundle exec rake test
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+
+      - name: Run RuboCop
+        run: bundle exec rubocop
+
+  release:
+    name: Publish to RubyGems
+    needs: [test, lint]
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+
+      - name: Verify tag matches gem version
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          VERSION=$(ruby -r./lib/solid_queue_guard/version -e 'puts SolidQueueGuard::VERSION')
+          if [ "$TAG" != "$VERSION" ]; then
+            echo "::error::Tag v${TAG} does not match gem version ${VERSION}"
+            exit 1
+          fi
+
+      - uses: rubygems/release-gem@v1
