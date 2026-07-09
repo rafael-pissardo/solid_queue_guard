@@ -1,0 +1,8 @@
+Description:
+    Installs Solid Queue Guard initializer with thresholds and feature flags.
+
+Usage:
+    bin/rails generate solid_queue_guard:install
+
+    This will create:
+        config/initializers/solid_queue_guard.rb
