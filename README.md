@@ -138,7 +138,7 @@ Perfect for deploy pipelines:
   run: SOLID_QUEUE_GUARD_STRICT=1 bin/rails solid_queue_guard:doctor
 ```
 
-### HTTP health (v0.2)
+### HTTP health
 
 ```ruby
 # config/routes.rb
@@ -148,6 +148,13 @@ mount SolidQueueGuard::Engine, at: "/solid_queue_guard"
 ```bash
 curl localhost:3000/solid_queue_guard/health
 # => { "status": "degraded", "queue_lag_seconds": 245, "warnings": [...] }
+```
+
+Optional token protection:
+
+```ruby
+config.health_token = ENV["SOLID_QUEUE_GUARD_TOKEN"]
+# curl -H "X-Solid-Queue-Guard-Token: $TOKEN" ...
 ```
 
 Works with **Kamal**, **Heroku**, **Fly.io**, **ECS/Fargate**, **Kubernetes**, **Better Stack**, **UptimeRobot**.
@@ -197,11 +204,11 @@ end
 
 | Version | Ships |
 | ------- | ----- |
-| **v0.1** | `doctor` — config checks, CI integration, install generator |
-| **v0.2** | Runtime health, queue lag, dispatcher/blocked jobs, HTTP endpoint |
-| **v0.3** | Slack, Datadog, webhook notifications |
-| **v0.4** | StatsD, Prometheus, OpenTelemetry metrics |
-| **v0.5** | Auto-recommendations for `queue.yml` topology |
+| **v0.1** | `doctor` — config checks, CI integration, install generator | ✅ Released |
+| **v0.2** | Runtime health, queue lag, dispatcher/blocked jobs, HTTP endpoint | ✅ Released |
+| **v0.3** | Slack, Datadog, webhook notifications | ✅ Released |
+| **v0.4** | StatsD, Prometheus, OpenTelemetry metrics | ✅ Released |
+| **v0.5** | Auto-recommendations for `queue.yml` topology | ✅ Released |
 
 ---
 
@@ -210,6 +217,7 @@ end
 | Gem version | Ruby | Rails |
 | ----------- | ---- | ----- |
 | 0.1.x       | 3.1+ | 7.1, 7.2, 8.0 |
+| 0.5.x       | 3.1+ | 7.1, 7.2, 8.0 |
 
 ## Requirements
 

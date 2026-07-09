@@ -12,10 +12,12 @@ module SolidQueueGuard
       assert_includes %i[healthy degraded unhealthy], report.status
     end
 
-    test 'runtime checks are skipped until v0.2' do
+    test 'runs runtime checks against the queue database' do
       report = SolidQueueGuard::Runner.new(scope: :runtime).run
 
-      assert report.results.all?(&:skip?)
+      assert report.results.any?
+      assert_not report.results.all?(&:skip?)
+      assert_includes report.results.map(&:id), 'queue_lag'
     end
   end
 end

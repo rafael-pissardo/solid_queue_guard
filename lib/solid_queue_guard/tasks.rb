@@ -17,7 +17,7 @@ namespace :solid_queue_guard do
 
   desc 'Print machine-readable health status'
   task health: :environment do
-    SolidQueueGuard::CLI.run!(scope: :config, format: :json, strict: cli_strict)
+    SolidQueueGuard::CLI.run!(scope: :all, format: :json, strict: cli_strict)
   end
 
   desc 'Print full diagnostic report. Usage: report[json]'

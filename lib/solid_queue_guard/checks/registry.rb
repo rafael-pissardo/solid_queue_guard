@@ -14,7 +14,8 @@ module SolidQueueGuard
         Config::SchedulerConfigCheck,
         Config::EnvFlagsCheck,
         Config::ProcessHeartbeatConfigCheck,
-        Config::PumaColocatedCheck
+        Config::PumaColocatedCheck,
+        Config::TopologyRecommendationCheck
       ].freeze
 
       RUNTIME_CHECKS = [

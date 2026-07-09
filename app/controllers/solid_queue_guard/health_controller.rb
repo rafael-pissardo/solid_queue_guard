@@ -2,8 +2,32 @@
 
 module SolidQueueGuard
   class HealthController < ApplicationController
+    before_action :authenticate_token!
+
     def show
-      render json: { status: 'not_implemented', message: 'HTTP health checks ship in v0.2' }, status: :not_implemented
+      payload = Health::Cache.fetch
+      status_code = http_status_for(payload[:status])
+
+      render json: payload, status: status_code
+    end
+
+    private
+
+    def authenticate_token!
+      token = SolidQueueGuard.config.health_token
+      return if token.blank?
+
+      provided = request.headers['X-Solid-Queue-Guard-Token'].presence || params[:token]
+      return if ActiveSupport::SecurityUtils.secure_compare(provided.to_s, token.to_s)
+
+      render json: { status: 'unauthorized' }, status: :unauthorized
+    end
+
+    def http_status_for(status)
+      case status.to_s
+      when 'unhealthy' then :service_unavailable
+      else :ok
+      end
     end
   end
 end

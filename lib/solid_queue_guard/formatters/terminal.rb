@@ -27,7 +27,7 @@ module SolidQueueGuard
       attr_reader :report
 
       def check_lines
-        report.results.map do |result|
+        report.results.reject(&:skip?).map do |result|
           icon = ICONS.fetch(result.status, '•')
           "#{icon} #{result.message}"
         end

@@ -25,6 +25,8 @@ Metrics/MethodLength:
 
 Metrics/AbcSize:
   Max: 25
+  Exclude:
+    - lib/solid_queue_guard/checks/runtime/**/*
 
 Gemspec/DevelopmentDependencies:
   Enabled: false
@@ -36,3 +38,7 @@ Rails/Exit:
 Naming/PredicateMethod:
   Exclude:
     - "lib/solid_queue_guard/tasks.rb"
+
+Style/MultilineBlockChain:
+  Exclude:
+    - "lib/solid_queue_guard/checks/runtime/**/*"

@@ -17,5 +17,17 @@ module SolidQueueGuard
         end
       end
     end
+
+    initializer 'solid_queue_guard.rails_health' do
+      next unless SolidQueueGuard.config.integrate_rails_health
+
+      ActiveSupport.on_load(:action_controller_base) do
+        Rails::HealthController.class_eval do
+          def solid_queue_guard_status
+            SolidQueueGuard::Health::Cache.fetch[:status]
+          end
+        end
+      end
+    end
   end
 end

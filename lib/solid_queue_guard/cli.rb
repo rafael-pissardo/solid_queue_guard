@@ -18,9 +18,12 @@ module SolidQueueGuard
       strict = strict_flag?(argv) if strict.nil?
 
       report = Runner.new(scope: scope).run
+      Notifier.deliver_all(report) if notify?(report)
+      Metrics::Exporter.export(report) if SolidQueueGuard.config.metrics_backends.any?
+
       output = formatter_for(format).new(report).render
 
-      Rails.logger.debug output unless output.empty?
+      $stdout.puts(output) unless output.empty?
 
       exit report.exit_code(strict: strict)
     end
@@ -50,6 +53,12 @@ module SolidQueueGuard
       else
         ENV.fetch('SOLID_QUEUE_GUARD_SCOPE', 'config').to_sym
       end
+    end
+
+    def notify?(report)
+      return false unless SolidQueueGuard.config.notify_with.any?
+
+      report.status != :healthy
     end
   end
 end

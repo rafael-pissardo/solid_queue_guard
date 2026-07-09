@@ -11,7 +11,8 @@ module SolidQueueGuard
                   :health_cache_ttl,
                   :scheduled_backlog_threshold,
                   :integrate_rails_health,
-                  :notify_with
+                  :notify_with,
+                  :metrics_backends
 
     def initialize
       @enabled = true
@@ -24,6 +25,7 @@ module SolidQueueGuard
       @scheduled_backlog_threshold = 100
       @integrate_rails_health = false
       @notify_with = [:rails_logger]
+      @metrics_backends = []
     end
 
     def strict?
