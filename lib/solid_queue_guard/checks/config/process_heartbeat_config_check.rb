@@ -13,13 +13,13 @@ module SolidQueueGuard
 
           if heartbeat_interval == DEFAULT_HEARTBEAT_INTERVAL && alive_threshold == DEFAULT_ALIVE_THRESHOLD
             warn(
-              "process_heartbeat_config",
-              "Process heartbeat thresholds use defaults (interval: 60s, alive: 5m)",
-              suggestion: "Consider customizing process_alive_threshold for your deployment latency requirements"
+              'process_heartbeat_config',
+              'Process heartbeat thresholds use defaults (interval: 60s, alive: 5m)',
+              suggestion: 'Consider customizing process_alive_threshold for your deployment latency requirements'
             )
           else
             pass(
-              "process_heartbeat_config",
+              'process_heartbeat_config',
               "Process heartbeat interval: #{heartbeat_interval.inspect}, alive threshold: #{alive_threshold.inspect}"
             )
           end

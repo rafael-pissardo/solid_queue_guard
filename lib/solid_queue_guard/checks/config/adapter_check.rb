@@ -8,12 +8,12 @@ module SolidQueueGuard
           adapter = Rails.application.config.active_job.queue_adapter
 
           if adapter.to_sym == :solid_queue
-            pass("adapter", "Active Job adapter is :solid_queue")
+            pass('adapter', 'Active Job adapter is :solid_queue')
           else
-            fail(
-              "adapter",
+            failure(
+              'adapter',
               "Active Job adapter is #{adapter.inspect}, expected :solid_queue",
-              suggestion: "Set config.active_job.queue_adapter = :solid_queue"
+              suggestion: 'Set config.active_job.queue_adapter = :solid_queue'
             )
           end
         end

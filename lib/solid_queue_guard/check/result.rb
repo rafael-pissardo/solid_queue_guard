@@ -3,8 +3,6 @@
 module SolidQueueGuard
   module Check
     Result = Data.define(:id, :status, :message, :suggestion, :metadata) do
-      STATUSES = %i[pass warn fail skip].freeze
-
       def initialize(id:, status:, message:, suggestion: nil, metadata: {})
         super
       end

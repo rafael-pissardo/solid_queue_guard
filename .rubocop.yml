@@ -1,0 +1,38 @@
+plugins:
+  - rubocop-rails
+
+AllCops:
+  NewCops: enable
+  TargetRubyVersion: 3.1
+  SuggestExtensions: false
+  Exclude:
+    - "gemfiles/**/*"
+    - "test/dummy/**/*"
+    - "vendor/**/*"
+    - "tmp/**/*"
+
+Style/Documentation:
+  Enabled: false
+
+Metrics/BlockLength:
+  Exclude:
+    - "Rakefile"
+    - "*.gemspec"
+    - "lib/solid_queue_guard/tasks.rb"
+
+Metrics/MethodLength:
+  Max: 25
+
+Metrics/AbcSize:
+  Max: 25
+
+Gemspec/DevelopmentDependencies:
+  Enabled: false
+
+Rails/Exit:
+  Exclude:
+    - "lib/solid_queue_guard/cli.rb"
+
+Naming/PredicateMethod:
+  Exclude:
+    - "lib/solid_queue_guard/tasks.rb"

@@ -2,9 +2,10 @@
 
 module SolidQueueGuard
   module Notifiers
+    # @api private
     class Base
       def self.deliver(_report)
-        raise NotImplementedError, "Notification adapters ship in v0.3"
+        raise NotImplementedError, 'Notification adapters ship in v0.3'
       end
     end
 

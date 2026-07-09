@@ -2,6 +2,8 @@
 /Gemfile.lock.bak
 /pkg/
 /tmp/
+/*.gem
+/solid_queue_guard-*/
 
 /test/dummy/db/*.sqlite3
 /test/dummy/log/*

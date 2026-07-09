@@ -8,22 +8,24 @@ module SolidQueueGuard
           required_threads = solid_queue_configuration.send(:estimated_number_of_threads)
           pool_size = SolidQueue::Record.connection_pool&.size
 
-          if pool_size.nil?
-            return skip("thread_pool", "Queue database connection pool is not available")
-          end
+          return skip('thread_pool', 'Queue database connection pool is not available') if pool_size.nil?
 
           max_worker_threads = solid_queue_configuration.send(:workers_options)
-            .map { |options| options.fetch(:threads, 3) }.max || 1
+                                                        .map do |options|
+            options.fetch(
+              :threads, 3
+            )
+          end.max || 1
 
           if pool_size >= required_threads
             pass(
-              "thread_pool",
+              'thread_pool',
               "Worker threads: #{max_worker_threads}, queue DB pool: #{pool_size}",
               metadata: { threads: max_worker_threads, pool: pool_size, required: required_threads }
             )
           else
-            fail(
-              "thread_pool",
+            failure(
+              'thread_pool',
               "Worker threads: #{max_worker_threads}, queue DB pool: #{pool_size}",
               suggestion: "Increase queue DB pool to at least #{required_threads} or reduce worker threads",
               metadata: { threads: max_worker_threads, pool: pool_size, required: required_threads }

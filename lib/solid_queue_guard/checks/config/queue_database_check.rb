@@ -8,13 +8,13 @@ module SolidQueueGuard
           config = Rails.application.config.database_configuration
           env_config = config[Rails.env]
 
-          if env_config.is_a?(Hash) && env_config.key?("queue")
-            pass("queue_database", "Queue database configured in database.yml")
+          if env_config.is_a?(Hash) && env_config.key?('queue')
+            pass('queue_database', 'Queue database configured in database.yml')
           else
-            fail(
-              "queue_database",
+            failure(
+              'queue_database',
               "No queue database entry in database.yml for #{Rails.env}",
-              suggestion: "Add a queue database configuration for Solid Queue"
+              suggestion: 'Add a queue database configuration for Solid Queue'
             )
           end
         end

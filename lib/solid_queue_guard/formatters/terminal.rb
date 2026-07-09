@@ -2,37 +2,42 @@
 
 module SolidQueueGuard
   module Formatters
+    # @api private
     class Terminal
-      ICONS = { pass: "✅", warn: "⚠️", fail: "❌", skip: "⏭️" }.freeze
+      ICONS = { pass: '✅', warn: '⚠️', fail: '❌', skip: '⏭️' }.freeze
 
       def initialize(report)
         @report = report
       end
 
       def render
-        lines = []
-        lines << "SolidQueueGuard Report"
-        lines << ""
-        lines << "Status: #{report.status.to_s.upcase}"
-        lines << ""
-        lines << "Checks:"
-
-        report.results.each do |result|
-          icon = ICONS.fetch(result.status, "•")
-          lines << "#{icon} #{result.message}"
-        end
-
-        if report.suggestions.any?
-          lines << ""
-          lines << "Suggested fixes:"
-          report.suggestions.each { |suggestion| lines << "- #{suggestion}" }
-        end
-
-        lines.join("\n")
+        [
+          'SolidQueueGuard Report',
+          '',
+          "Status: #{report.status.to_s.upcase}",
+          '',
+          'Checks:',
+          *check_lines,
+          *suggestion_lines
+        ].join("\n")
       end
 
       private
-        attr_reader :report
+
+      attr_reader :report
+
+      def check_lines
+        report.results.map do |result|
+          icon = ICONS.fetch(result.status, '•')
+          "#{icon} #{result.message}"
+        end
+      end
+
+      def suggestion_lines
+        return [] unless report.suggestions.any?
+
+        ['', 'Suggested fixes:', *report.suggestions.map { |suggestion| "- #{suggestion}" }]
+      end
     end
   end
 end

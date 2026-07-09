@@ -20,7 +20,7 @@ module SolidQueueGuard
       report = Runner.new(scope: scope).run
       output = formatter_for(format).new(report).render
 
-      puts output unless output.empty?
+      Rails.logger.debug output unless output.empty?
 
       exit report.exit_code(strict: strict)
     end
@@ -33,22 +33,22 @@ module SolidQueueGuard
     end
 
     def strict_flag?(argv)
-      SolidQueueGuard.config.strict? || argv.include?("--strict")
+      SolidQueueGuard.config.strict? || argv.include?('--strict')
     end
 
     def format_flag(argv)
-      if (format_argument = argv.find { |argument| argument.start_with?("--format=") })
-        format_argument.split("=", 2).last.to_sym
+      if (format_argument = argv.find { |argument| argument.start_with?('--format=') })
+        format_argument.split('=', 2).last.to_sym
       else
-        ENV.fetch("SOLID_QUEUE_GUARD_FORMAT", "text").to_sym
+        ENV.fetch('SOLID_QUEUE_GUARD_FORMAT', 'text').to_sym
       end
     end
 
     def scope_flag(argv)
-      if (scope_argument = argv.find { |argument| argument.start_with?("--scope=") })
-        scope_argument.split("=", 2).last.to_sym
+      if (scope_argument = argv.find { |argument| argument.start_with?('--scope=') })
+        scope_argument.split('=', 2).last.to_sym
       else
-        ENV.fetch("SOLID_QUEUE_GUARD_SCOPE", "config").to_sym
+        ENV.fetch('SOLID_QUEUE_GUARD_SCOPE', 'config').to_sym
       end
     end
   end

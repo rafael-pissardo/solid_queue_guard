@@ -2,6 +2,7 @@
 
 module SolidQueueGuard
   module Formatters
+    # @api private
     class Json
       def initialize(report)
         @report = report
@@ -12,7 +13,8 @@ module SolidQueueGuard
       end
 
       private
-        attr_reader :report
+
+      attr_reader :report
     end
   end
 end

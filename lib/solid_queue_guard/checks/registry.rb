@@ -2,6 +2,7 @@
 
 module SolidQueueGuard
   module Checks
+    # @api private
     class Registry
       CONFIG_CHECKS = [
         Config::AdapterCheck,

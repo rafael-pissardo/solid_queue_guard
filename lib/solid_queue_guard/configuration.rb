@@ -23,11 +23,11 @@ module SolidQueueGuard
       @health_cache_ttl = 15.seconds
       @scheduled_backlog_threshold = 100
       @integrate_rails_health = false
-      @notify_with = [ :rails_logger ]
+      @notify_with = [:rails_logger]
     end
 
     def strict?
-      strict_mode || ActiveModel::Type::Boolean.new.cast(ENV["SOLID_QUEUE_GUARD_STRICT"])
+      strict_mode || ActiveModel::Type::Boolean.new.cast(ENV.fetch('SOLID_QUEUE_GUARD_STRICT', nil))
     end
   end
 end

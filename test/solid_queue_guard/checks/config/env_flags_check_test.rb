@@ -1,16 +1,22 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require 'test_helper'
 
-class SolidQueueGuard::Checks::Config::EnvFlagsCheckTest < ActiveSupport::TestCase
-  test "warns when recurring jobs are skipped in production" do
-    Rails.env.stubs(:production?).returns(true)
-    ENV["SOLID_QUEUE_SKIP_RECURRING"] = "true"
+module SolidQueueGuard
+  module Checks
+    module Config
+      class EnvFlagsCheckTest < ActiveSupport::TestCase
+        test 'warns when recurring jobs are skipped in production' do
+          Rails.env.stubs(:production?).returns(true)
+          ENV['SOLID_QUEUE_SKIP_RECURRING'] = 'true'
 
-    result = SolidQueueGuard::Checks::Config::EnvFlagsCheck.call
+          result = SolidQueueGuard::Checks::Config::EnvFlagsCheck.call
 
-    assert_predicate result, :warn?
-  ensure
-    ENV.delete("SOLID_QUEUE_SKIP_RECURRING")
+          assert_predicate result, :warn?
+        ensure
+          ENV.delete('SOLID_QUEUE_SKIP_RECURRING')
+        end
+      end
+    end
   end
 end

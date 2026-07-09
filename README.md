@@ -205,11 +205,17 @@ end
 
 ---
 
+## Compatibility
+
+| Gem version | Ruby | Rails |
+| ----------- | ---- | ----- |
+| 0.1.x       | 3.1+ | 7.1, 7.2, 8.0 |
+
 ## Requirements
 
 - Ruby >= 3.1
-- Rails >= 7.1
-- [solid_queue](https://github.com/rails/solid_queue) >= 1.0
+- Rails >= 7.1, < 9.0
+- [solid_queue](https://github.com/rails/solid_queue) >= 1.0, < 2.0
 
 ---
 
@@ -221,6 +227,9 @@ cd solid_queue_guard
 bundle install
 cd test/dummy && bin/setup
 cd ../.. && bundle exec rake test
+bundle exec rubocop
+bundle exec appraisal install
+bundle exec appraisal rake test
 ```
 
 ---

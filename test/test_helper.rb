@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-ENV["RAILS_ENV"] = "test"
+ENV['RAILS_ENV'] = 'test'
 
-require "minitest"
-require_relative "dummy/config/environment"
-require "rails/test_help"
-require "mocha/minitest"
+require 'minitest'
+require_relative 'dummy/config/environment'
+require 'rails/test_help'
+require 'mocha/minitest'

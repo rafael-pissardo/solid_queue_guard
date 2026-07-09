@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 SolidQueueGuard.configure do |config|
   config.enabled = Rails.env.production?
 
