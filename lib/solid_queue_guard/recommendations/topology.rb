@@ -31,6 +31,8 @@ module SolidQueueGuard
       end
 
       def pool_recommendations
+        return async_pool_recommendation if PumaPluginSupport.async_supervisor_mode?
+
         required_threads = configuration.estimated_number_of_threads
         pool_size = SolidQueue::Record.connection_pool&.size
         return [] if pool_size.nil? || required_threads <= pool_size
@@ -57,6 +59,17 @@ module SolidQueueGuard
         SolidQueue::Record.connection_pool&.with_connection(&:active?)
       rescue StandardError
         false
+      end
+
+      def async_pool_recommendation
+        required_threads = configuration.estimated_number_of_threads
+        pool_size = SolidQueue::Record.connection_pool&.size
+        return [] if pool_size.nil? || required_threads <= pool_size
+
+        ["Increase queue DB pool to at least #{required_threads + 2} " \
+         "for async supervisor mode (currently #{pool_size})"]
+      rescue StandardError
+        []
       end
     end
   end

@@ -15,7 +15,8 @@ module SolidQueueGuard
         Config::EnvFlagsCheck,
         Config::ProcessHeartbeatConfigCheck,
         Config::PumaColocatedCheck,
-        Config::TopologyRecommendationCheck
+        Config::TopologyRecommendationCheck,
+        Config::AsyncSupervisorConfigCheck
       ].freeze
 
       RUNTIME_CHECKS = [
@@ -30,10 +31,15 @@ module SolidQueueGuard
         Runtime::RecurringStaleCheck,
         Runtime::PausedQueueLagCheck,
         Runtime::PidfileCheck,
-        Runtime::FinishedJobsGrowthCheck
+        Runtime::FinishedJobsGrowthCheck,
+        Runtime::PumaPluginRuntimeCheck
       ].freeze
 
       class << self
+        def check_id_for(check_class)
+          check_class.check_id
+        end
+
         def for(scope)
           case scope.to_sym
           when :config then CONFIG_CHECKS

@@ -14,35 +14,29 @@ module SolidQueueGuard
         end
 
         test 'passes when puma config is missing' do
-          Dir.mktmpdir do |dir|
-            root = Pathname(dir)
-            SolidQueueGuard::Checks::Config::PumaColocatedCheck.any_instance.stubs(:rails_root).returns(root)
+          PumaPluginSupport.stubs(:puma_config_path).returns(Pathname('/tmp/missing/puma.rb'))
+          Pathname('/tmp/missing/puma.rb').stubs(:exist?).returns(false)
 
-            result = SolidQueueGuard::Checks::Config::PumaColocatedCheck.call
+          result = SolidQueueGuard::Checks::Config::PumaColocatedCheck.call
 
-            assert_predicate result, :pass?
-            assert_includes result.message, 'No config/puma.rb'
-          end
+          assert_predicate result, :pass?
+          assert_includes result.message, 'No config/puma.rb'
+        ensure
+          PumaPluginSupport.unstub(:puma_config_path)
+          Pathname('/tmp/missing/puma.rb').unstub(:exist?)
         end
 
         test 'warns when puma plugin is enabled in production' do
           Rails.env.stubs(:production?).returns(true)
+          PumaPluginSupport.stubs(:puma_plugin_enabled?).returns(true)
 
-          Dir.mktmpdir do |dir|
-            root = Pathname(dir)
-            puma_config = root.join('config/puma.rb')
-            puma_config.dirname.mkpath
-            puma_config.write("plugin :solid_queue\n")
+          result = SolidQueueGuard::Checks::Config::PumaColocatedCheck.call
 
-            SolidQueueGuard::Checks::Config::PumaColocatedCheck.any_instance.stubs(:rails_root).returns(root)
-
-            result = SolidQueueGuard::Checks::Config::PumaColocatedCheck.call
-
-            assert_predicate result, :warn?
-            assert_includes result.suggestion, 'dedicated job process'
-          end
+          assert_predicate result, :warn?
+          assert_includes result.suggestion, 'dedicated job process'
         ensure
           Rails.env.unstub(:production?)
+          PumaPluginSupport.unstub(:puma_plugin_enabled?)
         end
       end
     end

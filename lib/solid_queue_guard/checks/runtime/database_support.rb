@@ -28,8 +28,11 @@ module SolidQueueGuard
         end
 
         def lag_threshold_for(queue_name)
-          thresholds = config.queue_lag_thresholds
-          thresholds[queue_name.to_sym] || thresholds[queue_name] || thresholds[:default]
+          thresholds = config.check_setting(:queue_lag, :thresholds, config.queue_lag_thresholds)
+          per_queue = thresholds[queue_name.to_sym] || thresholds[queue_name]
+          return per_queue if per_queue
+
+          config.check_setting(:queue_lag, :threshold, thresholds[:default])
         end
       end
     end

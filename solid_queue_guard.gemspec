@@ -25,7 +25,9 @@ Gem::Specification.new do |spec|
   }
 
   spec.files = Dir.chdir(File.expand_path(__dir__)) do
-    Dir['{app,config,lib}/**/*', 'MIT-LICENSE', 'Rakefile', 'README.md']
+    `git ls-files -z`.split("\x0").reject do |file|
+      file.start_with?('test/', '.github/', 'docs/', 'script/', 'gemfiles/', 'Appraisals')
+    end
   end
 
   spec.require_paths = ['lib']

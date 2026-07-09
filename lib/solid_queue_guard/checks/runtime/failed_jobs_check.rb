@@ -9,7 +9,7 @@ module SolidQueueGuard
         def call
           with_queue_database do
             count = SolidQueue::FailedExecution.where(created_at: WINDOW.ago..).count
-            threshold = config.failed_jobs_threshold
+            threshold = config.check_setting(:failed_jobs, :threshold, config.failed_jobs_threshold)
 
             if count > threshold
               warn(

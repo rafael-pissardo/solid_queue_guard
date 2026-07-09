@@ -1,0 +1,25 @@
+name: Solid Queue Guard
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  doctor:
+    name: Solid Queue production readiness
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+
+      - name: Prepare test database
+        run: bin/rails db:test:prepare
+
+      - name: Run Solid Queue Guard doctor
+        run: SOLID_QUEUE_GUARD_STRICT=1 bin/rails solid_queue_guard:doctor

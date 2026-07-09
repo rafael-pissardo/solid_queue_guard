@@ -29,7 +29,7 @@ module SolidQueueGuard
         private
 
         def expected_staleness
-          config.stale_process_threshold * 2
+          config.check_setting(:recurring_stale, :threshold, config.stale_process_threshold * 2)
         end
       end
     end

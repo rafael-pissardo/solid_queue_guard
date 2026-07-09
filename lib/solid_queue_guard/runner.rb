@@ -27,10 +27,19 @@ module SolidQueueGuard
     end
 
     def run_check(check_class)
+      check_id = Checks::Registry.check_id_for(check_class)
+      unless SolidQueueGuard.config.check_enabled?(check_id)
+        return Check::Result.new(
+          id: check_id,
+          status: :skip,
+          message: 'Check disabled via configuration'
+        )
+      end
+
       check_class.call
     rescue StandardError => e
       Check::Result.new(
-        id: check_class.name.demodulize.underscore,
+        id: check_id,
         status: :fail,
         message: "Check raised an error: #{e.class}: #{e.message}"
       )

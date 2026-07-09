@@ -4,27 +4,21 @@ module SolidQueueGuard
   module Checks
     module Config
       class PumaColocatedCheck < Base
-        PUMA_PLUGIN_PATTERN = /plugin\s+:?solid_queue/
-
         def call
-          puma_config = rails_root.join('config/puma.rb')
+          return pass(check_id, 'No config/puma.rb found') unless PumaPluginSupport.puma_config_path.exist?
 
-          return pass('puma_colocated', 'No config/puma.rb found') unless puma_config.exist?
-
-          content = puma_config.read
-
-          if content.match?(PUMA_PLUGIN_PATTERN)
+          if PumaPluginSupport.puma_plugin_enabled?
             if Rails.env.production?
               warn(
-                'puma_colocated',
+                check_id,
                 'Solid Queue Puma plugin is enabled in production',
                 suggestion: 'Run Solid Queue in a dedicated job process for better isolation and memory management'
               )
             else
-              pass('puma_colocated', 'Solid Queue Puma plugin detected (non-production environment)')
+              pass(check_id, 'Solid Queue Puma plugin detected (non-production environment)')
             end
           else
-            pass('puma_colocated', 'Solid Queue is not co-located with Puma')
+            pass(check_id, 'Solid Queue is not co-located with Puma')
           end
         end
       end

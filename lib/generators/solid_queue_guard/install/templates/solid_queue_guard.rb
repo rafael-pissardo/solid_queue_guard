@@ -14,6 +14,12 @@ SolidQueueGuard.configure do |config|
   config.health_cache_ttl = 15.seconds
   config.scheduled_backlog_threshold = 100
 
+  # config.disabled_checks = [:pidfile]
+  # config.checks.queue_lag = { threshold: 10.minutes }
+  # config.checks.failed_jobs = { threshold: 5, enabled: true }
+  # config.degraded_http_status = 207
+  # config.unhealthy_http_status = 503
+
   # config.health_token = ENV["SOLID_QUEUE_GUARD_TOKEN"]
   # config.integrate_rails_health = true
   # config.notify_with = [:rails_logger, :slack, :datadog, :webhook]

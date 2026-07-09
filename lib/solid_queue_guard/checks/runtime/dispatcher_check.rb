@@ -9,16 +9,18 @@ module SolidQueueGuard
             dispatchers = SolidQueue::Process.where(kind: 'Dispatcher')
             due_count = SolidQueue::ScheduledExecution.due.count
 
+            threshold = config.check_setting(:scheduled_backlog, :threshold, config.scheduled_backlog_threshold)
+
             if dispatchers.none? && due_count.positive?
               failure(
                 check_id,
                 "#{due_count} scheduled job(s) are due but no dispatcher is running",
                 suggestion: 'Start a dispatcher process or verify bin/jobs is running'
               )
-            elsif due_count > config.scheduled_backlog_threshold
+            elsif due_count > threshold
               warn(
                 check_id,
-                "#{due_count} scheduled executions are due (threshold: #{config.scheduled_backlog_threshold})",
+                "#{due_count} scheduled executions are due (threshold: #{threshold})",
                 suggestion: 'Verify the dispatcher is keeping up with scheduled work'
               )
             else

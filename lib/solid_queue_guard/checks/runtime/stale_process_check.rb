@@ -6,7 +6,7 @@ module SolidQueueGuard
       class StaleProcessCheck < Base
         def call
           with_queue_database do
-            threshold = config.stale_process_threshold
+            threshold = config.check_setting(:stale_process, :threshold, config.stale_process_threshold)
             stale = SolidQueue::Process.where(last_heartbeat_at: ...threshold.ago)
 
             if stale.none?

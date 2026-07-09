@@ -1,0 +1,9 @@
+Description:
+    Adds a GitHub Actions workflow that runs `solid_queue_guard:doctor` with strict mode.
+
+Example:
+    bin/rails generate solid_queue_guard:install:ci
+
+    This will create:
+
+        .github/workflows/solid_queue_guard.yml

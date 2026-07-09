@@ -24,10 +24,7 @@ module SolidQueueGuard
     end
 
     def http_status_for(status)
-      case status.to_s
-      when 'unhealthy' then :service_unavailable
-      else :ok
-      end
+      HttpStatusPolicy.for_report_status(status)
     end
   end
 end

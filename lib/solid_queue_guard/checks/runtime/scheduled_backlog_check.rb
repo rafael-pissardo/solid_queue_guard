@@ -7,7 +7,7 @@ module SolidQueueGuard
         def call
           with_queue_database do
             due_count = SolidQueue::ScheduledExecution.due.count
-            threshold = config.scheduled_backlog_threshold
+            threshold = config.check_setting(:scheduled_backlog, :threshold, config.scheduled_backlog_threshold)
 
             if due_count > threshold
               warn(

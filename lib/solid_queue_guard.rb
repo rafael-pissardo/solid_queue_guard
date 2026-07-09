@@ -18,7 +18,7 @@ module SolidQueueGuard
     attr_accessor :configuration
 
     def deprecator
-      @deprecator ||= ActiveSupport::Deprecation.new('0.2', 'SolidQueueGuard')
+      @deprecator ||= ActiveSupport::Deprecation.new('2.0', 'SolidQueueGuard')
     end
 
     def configure

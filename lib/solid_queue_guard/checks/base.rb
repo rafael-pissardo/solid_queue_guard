@@ -8,6 +8,10 @@ module SolidQueueGuard
         new(**options).call
       end
 
+      def self.check_id
+        name.demodulize.underscore.delete_suffix('_check')
+      end
+
       def initialize(**options)
         @options = options
       end
@@ -46,6 +50,18 @@ module SolidQueueGuard
 
       def solid_queue_configuration
         @solid_queue_configuration ||= SolidQueue::Configuration.new
+      end
+
+      def check_id
+        self.class.check_id
+      end
+
+      def guard_config
+        SolidQueueGuard.config
+      end
+
+      def check_setting(key, default = nil)
+        guard_config.check_setting(check_id, key, default)
       end
     end
   end
