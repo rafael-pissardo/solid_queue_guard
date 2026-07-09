@@ -9,8 +9,10 @@ require 'mocha/minitest'
 
 # Dummy app configures :solid_queue for runtime checks. Rails 7.1's ActiveJob test
 # helper otherwise swaps in TestAdapter, which breaks Mission Control navigation.
-class ActionDispatch::IntegrationTest
-  def queue_adapter_for_test
-    nil
+module ActionDispatch
+  class IntegrationTest
+    def queue_adapter_for_test
+      nil
+    end
   end
 end
