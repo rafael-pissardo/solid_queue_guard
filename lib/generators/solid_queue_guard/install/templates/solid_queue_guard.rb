@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 SolidQueueGuard.configure do |config|
-  config.enabled = Rails.env.production?
+  config.enabled = %w[production staging].include?(Rails.env)
 
   config.queue_lag_thresholds = {
     critical: 30.seconds,

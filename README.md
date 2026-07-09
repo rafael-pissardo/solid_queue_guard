@@ -199,7 +199,7 @@ bin/rails solid_queue_guard:doctor      # config checks (default scope)
 bin/rails solid_queue_guard:report      # config + runtime when the queue DB is available
 ```
 
-By default the install generator sets `config.enabled = Rails.env.production?`, so in **development** checks are skipped unless you enable them:
+By default the install generator sets `config.enabled = %w[production staging].include?(Rails.env)`, so in **development** and other non-deployed environments checks are skipped unless you enable them:
 
 ```ruby
 SolidQueueGuard.configure { |c| c.enabled = true }
@@ -330,7 +330,7 @@ Apps that keep Solid Queue tables only in `structure.sql` (common in Revelo-styl
 ```ruby
 # config/initializers/solid_queue_guard.rb
 SolidQueueGuard.configure do |config|
-  config.enabled = Rails.env.production?
+  config.enabled = %w[production staging].include?(Rails.env)
 
   config.queue_lag_thresholds = {
     critical: 30.seconds,
