@@ -6,7 +6,7 @@
 | Product Manager | N/A (open source library)                  |
 | Team            | @rpissardo (solo OSS project)              |
 | Epic/Ticket     | N/A                                        |
-| Repository      | github.com/rpissardo/solid_queue_guard     |
+| Repository      | https://github.com/rafael-pissardo/solid_queue_guard |
 | Status          | Draft                                      |
 | Created         | 2026-07-09                                 |
 | Last Updated    | 2026-07-09                                 |

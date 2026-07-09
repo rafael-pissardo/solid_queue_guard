@@ -7,7 +7,7 @@ Gem::Specification.new do |spec|
   spec.version     = SolidQueueGuard::VERSION
   spec.authors     = [ "Rafael Pissardo" ]
   spec.email       = [ "rpissardo@users.noreply.github.com" ]
-  spec.homepage    = "https://github.com/rpissardo/solid_queue_guard"
+  spec.homepage    = "https://github.com/rafael-pissardo/solid_queue_guard"
   spec.summary     = "Production readiness checks and runtime guards for Rails Solid Queue."
   spec.description = "Detect queue lag, dead workers, unsafe thread/pool configuration, and broken recurring jobs before they become incidents."
   spec.license     = "MIT"
