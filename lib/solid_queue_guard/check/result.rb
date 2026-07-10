@@ -2,9 +2,15 @@
 
 module SolidQueueGuard
   module Check
-    Result = Data.define(:id, :status, :message, :suggestion, :metadata) do
+    class Result
+      attr_reader :id, :status, :message, :suggestion, :metadata
+
       def initialize(id:, status:, message:, suggestion: nil, metadata: {})
-        super
+        @id = id
+        @status = status
+        @message = message
+        @suggestion = suggestion
+        @metadata = metadata
       end
 
       def pass?
