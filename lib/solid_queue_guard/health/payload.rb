@@ -2,6 +2,7 @@
 
 module SolidQueueGuard
   module Health
+    # @api private
     class Payload
       def initialize(report)
         @report = report

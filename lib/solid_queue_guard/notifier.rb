@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module SolidQueueGuard
+  # @api private
   class Notifier
     class << self
       def deliver_all(report, adapters: SolidQueueGuard.config.notify_with)

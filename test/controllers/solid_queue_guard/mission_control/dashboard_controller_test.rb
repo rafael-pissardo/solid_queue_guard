@@ -65,6 +65,13 @@ module SolidQueueGuard
         SolidQueueGuard::Health::Cache.unstub(:fetch)
       end
 
+      test 'recurring tasks navigation links to application scoped guard path' do
+        get '/jobs/applications/dummy/recurring_tasks', params: { server_id: 'solid_queue' }
+
+        assert_response :success
+        assert_includes response.body, '/jobs/applications/dummy/guard?server_id=solid_queue'
+      end
+
       private
 
       def guard_dashboard_path

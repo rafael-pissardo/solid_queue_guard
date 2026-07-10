@@ -34,5 +34,14 @@ module SolidQueueGuard
       assert_equal :unhealthy, report.status
       assert_equal 1, report.exit_code(strict: true)
     end
+
+    test 'to_h includes status_counts' do
+      report = SolidQueueGuard::Report.new([
+                                             Result.new(id: 'a', status: :pass, message: 'ok'),
+                                             Result.new(id: 'b', status: :warn, message: 'warn')
+                                           ])
+
+      assert_equal({ pass: 1, warn: 1 }, report.to_h[:status_counts])
+    end
   end
 end

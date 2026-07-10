@@ -2,6 +2,7 @@
 
 module SolidQueueGuard
   module MissionControl
+    # @api private
     module NavigationExtension
       def navigation_sections
         super.tap do |sections|

@@ -15,7 +15,7 @@ module SolidQueueGuard
         run_check(check_class)
       end
 
-      Report.new(results)
+      Report.new(results).tap { |report| Observability.log_results(report) }
     end
 
     private

@@ -37,8 +37,13 @@ module SolidQueueGuard
         status: status.to_s,
         warnings: warnings,
         suggestions: suggestions,
+        status_counts: status_counts,
         checks: results.map(&:to_h)
       }
+    end
+
+    def status_counts
+      results.group_by(&:status).transform_values(&:size)
     end
   end
 end

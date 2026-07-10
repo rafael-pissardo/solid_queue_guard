@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-07-10
+
+### Added
+
+- `config.validate!` at boot — rejects invalid HTTP status codes, thresholds, and `on_status_change` types
+- `config.on_status_change` callback when `/solid_queue_guard/health` detects a status transition
+- Structured logging per check result (debug for pass/skip, warn/error for warn/fail)
+- `status_counts` in report and health JSON payload
+- Per-check metrics for StatsD, Prometheus, and OpenTelemetry exporters
+- `SolidQueueGuard::Checks::Registry.catalog` for listing check IDs
+- `bin/console` for dummy app debugging
+- `CONTRIBUTING.md`, `docs/configuration.md`, and `docs/checks.md`
+- CI: Ruby 3.1 matrix, dedicated Appraisal job, and `gem build` verification
+- Mission Control navigation integration test from recurring tasks page
+
+### Changed
+
+- README trimmed with links to dedicated docs
+- Mission Control screenshot shipped in gem package for RubyGems README rendering
+- OpenTelemetry exporter requires `opentelemetry-sdk` with clear log when missing
+
 ## [1.1.4] - 2026-07-10
 
 ### Fixed

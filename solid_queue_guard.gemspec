@@ -26,7 +26,8 @@ Gem::Specification.new do |spec|
 
   spec.files = Dir.chdir(File.expand_path(__dir__)) do
     `git ls-files -z`.split("\x0").reject do |file|
-      file.start_with?('test/', '.github/', 'docs/', 'script/', 'gemfiles/', 'Appraisals')
+      file.start_with?('test/', '.github/', 'script/', 'gemfiles/', 'Appraisals') ||
+        (file.start_with?('docs/') && file != 'docs/mission-control-guard-dashboard.png')
     end
   end
 

@@ -2,6 +2,7 @@
 
 module SolidQueueGuard
   module MissionControl
+    # @api private
     class Integration
       class << self
         def install!

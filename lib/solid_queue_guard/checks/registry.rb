@@ -40,6 +40,13 @@ module SolidQueueGuard
           check_class.check_id
         end
 
+        def catalog
+          {
+            config: CONFIG_CHECKS.map(&:check_id),
+            runtime: RUNTIME_CHECKS.map(&:check_id)
+          }
+        end
+
         def for(scope)
           case scope.to_sym
           when :config then CONFIG_CHECKS

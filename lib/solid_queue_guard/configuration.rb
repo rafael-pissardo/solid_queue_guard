@@ -2,6 +2,10 @@
 
 module SolidQueueGuard
   class Configuration
+    class ValidationError < StandardError; end
+
+    HTTP_STATUS_OPTIONS = HttpStatusPolicy::STATUS_MAP.keys.freeze
+
     attr_accessor :enabled,
                   :queue_lag_thresholds,
                   :failed_jobs_threshold,
@@ -17,7 +21,8 @@ module SolidQueueGuard
                   :disabled_checks,
                   :checks,
                   :degraded_http_status,
-                  :unhealthy_http_status
+                  :unhealthy_http_status,
+                  :on_status_change
 
     def initialize
       @enabled = true
@@ -36,6 +41,18 @@ module SolidQueueGuard
       @checks = ActiveSupport::OrderedOptions.new
       @degraded_http_status = :ok
       @unhealthy_http_status = :service_unavailable
+      @on_status_change = nil
+    end
+
+    def validate!
+      validate_http_status!(:degraded_http_status, degraded_http_status)
+      validate_http_status!(:unhealthy_http_status, unhealthy_http_status)
+      validate_duration!(:stale_process_threshold, stale_process_threshold)
+      validate_duration!(:health_cache_ttl, health_cache_ttl)
+      validate_positive_integer!(:failed_jobs_threshold, failed_jobs_threshold)
+      validate_positive_integer!(:scheduled_backlog_threshold, scheduled_backlog_threshold)
+      validate_callback!(:on_status_change, on_status_change)
+      self
     end
 
     def strict?
@@ -65,6 +82,37 @@ module SolidQueueGuard
       value = settings[key]
       value = settings[key.to_sym] if value.nil?
       value.nil? ? default : value
+    end
+
+    private
+
+    def validate_http_status!(attribute, value)
+      return if HTTP_STATUS_OPTIONS.include?(normalize_http_status_key(value))
+
+      raise ValidationError,
+            "#{attribute} must be one of #{HTTP_STATUS_OPTIONS.inspect}, got #{value.inspect}"
+    end
+
+    def normalize_http_status_key(value)
+      value.is_a?(Integer) ? value : value.to_sym
+    end
+
+    def validate_duration!(attribute, value)
+      return if value.is_a?(ActiveSupport::Duration) && value.positive?
+
+      raise ValidationError, "#{attribute} must be a positive ActiveSupport::Duration"
+    end
+
+    def validate_positive_integer!(attribute, value)
+      return if value.is_a?(Integer) && value.positive?
+
+      raise ValidationError, "#{attribute} must be a positive Integer"
+    end
+
+    def validate_callback!(attribute, value)
+      return if value.nil? || value.respond_to?(:call)
+
+      raise ValidationError, "#{attribute} must respond to #call"
     end
   end
 end

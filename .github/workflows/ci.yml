@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby: ["3.2", "3.3", "3.4"]
+        ruby: ["3.1", "3.2", "3.3", "3.4"]
         gemfile:
           - gemfiles/rails_7_1.gemfile
           - gemfiles/rails_7_2.gemfile
@@ -30,6 +30,22 @@ jobs:
       - name: Run tests
         run: bundle exec rake test
 
+  appraisal:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+
+      - name: Install appraisal gemfiles
+        run: bundle exec appraisal install
+
+      - name: Run appraisal tests
+        run: bundle exec appraisal rake test
+
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -42,3 +58,20 @@ jobs:
 
       - name: Run RuboCop
         run: bundle exec rubocop
+
+  build:
+    runs-on: ubuntu-latest
+    needs: [test, appraisal, lint]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+
+      - name: Build gem package
+        run: gem build solid_queue_guard.gemspec
+
+      - name: Verify gem installs
+        run: gem install ./solid_queue_guard-*.gem --local

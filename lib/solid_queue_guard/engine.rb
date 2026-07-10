@@ -15,6 +15,7 @@ module SolidQueueGuard
         config.solid_queue_guard.each do |name, value|
           guard_config.public_send("#{name}=", value)
         end
+        guard_config.validate!
       end
     end
 

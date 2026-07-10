@@ -4,6 +4,7 @@ module SolidQueueGuard
   module Metrics
     class Exporter
       STATUS_VALUES = { healthy: 0, degraded: 1, unhealthy: 2 }.freeze
+      CHECK_STATUS_VALUES = { pass: 0, warn: 1, fail: 2, skip: 3 }.freeze
 
       def self.export(report, backends: SolidQueueGuard.config.metrics_backends)
         new(report, backends: backends).export
@@ -27,6 +28,8 @@ module SolidQueueGuard
         when :statsd then Statsd.export(report)
         when :prometheus then Prometheus.export(report)
         when :opentelemetry then OpenTelemetry.export(report)
+        else
+          OptionalDependency.log_missing("metrics backend #{backend}")
         end
       end
     end
