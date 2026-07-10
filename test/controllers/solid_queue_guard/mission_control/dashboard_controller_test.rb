@@ -72,6 +72,16 @@ module SolidQueueGuard
         assert_includes response.body, '/jobs/applications/dummy/guard?server_id=solid_queue'
       end
 
+      test 'guard dashboard uses mission control routes for url generation' do
+        SolidQueueGuard::Health::Cache.stubs(:fetch).returns(status: 'healthy', checks: [])
+
+        get guard_dashboard_path
+
+        assert @controller._routes.equal?(::MissionControl::Jobs::Engine.routes)
+      ensure
+        SolidQueueGuard::Health::Cache.unstub(:fetch)
+      end
+
       private
 
       def guard_dashboard_path
