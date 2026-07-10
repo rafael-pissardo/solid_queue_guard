@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    solid_queue_guard (1.2.2)
+    solid_queue_guard (1.2.3)
       actionpack (>= 7.1, < 9.0)
       activejob (>= 7.1, < 9.0)
       activerecord (>= 7.1, < 9.0)
@@ -330,4 +330,4 @@ DEPENDENCIES
   sqlite3 (~> 2.1)
 
 BUNDLED WITH
-   2.7.2
+   2.6.9
