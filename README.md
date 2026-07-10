@@ -157,7 +157,8 @@ Internal check classes and registry are `@api private`.
 
 | Gem version | Ruby | Rails |
 | ----------- | ---- | ----- |
-| 1.2.x       | 3.1+ | 7.1, 7.2, 8.0 |
+| 1.2.x       | 3.1+ | 7.1, 7.2 |
+| 1.2.x       | 3.2+ | 8.0 |
 | 1.1.x       | 3.1+ | 7.1, 7.2, 8.0 |
 | 1.0.x       | 3.1+ | 7.1, 7.2, 8.0 |
 
