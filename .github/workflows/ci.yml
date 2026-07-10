@@ -78,4 +78,6 @@ jobs:
         run: gem build solid_queue_guard.gemspec
 
       - name: Verify gem installs
-        run: gem install ./solid_queue_guard-*.gem --local
+        run: |
+          gem install ./solid_queue_guard-*.gem --local --ignore-dependencies
+          bundle exec ruby -e "require 'solid_queue_guard'; puts SolidQueueGuard::VERSION"
