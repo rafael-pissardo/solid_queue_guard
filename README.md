@@ -1,18 +1,62 @@
-# solid_queue_guard
+<p align="center">
+  <img src="https://img.shields.io/gem/v/solid_queue_guard?style=for-the-badge" alt="Gem Version">
+  <img src="https://img.shields.io/badge/Ruby-3.1%2B-red?style=for-the-badge&logo=ruby" alt="Ruby 3.1+">
+  <img src="https://img.shields.io/badge/Rails-7.1–8.0-red?style=for-the-badge&logo=rubyonrails" alt="Rails 7.1–8.0">
+  <img src="https://img.shields.io/github/actions/workflow/status/rafael-pissardo/solid_queue_guard/ci.yml?branch=main&style=for-the-badge&label=CI" alt="CI">
+  <img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge" alt="MIT License">
+</p>
 
-**Production readiness checks and runtime guards for Rails Solid Queue.**
+<h1 align="center">solid_queue_guard</h1>
 
-[![Gem Version](https://img.shields.io/gem/v/solid_queue_guard)](https://rubygems.org/gems/solid_queue_guard)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](MIT-LICENSE)
+<p align="center">
+  <strong>Your Solid Queue production doctor.</strong><br>
+  Catch dead workers, queue lag, and broken config <em>before</em> the 3am page.
+</p>
 
-Rails 8 ships with [Solid Queue](https://github.com/rails/solid_queue). Redis is optional. Production config is not.
+<p align="center">
+  <a href="#-quick-start"><strong>Quick start</strong></a> ·
+  <a href="#-see-it-in-action"><strong>Demo output</strong></a> ·
+  <a href="#-mission-control-dashboard-opt-in"><strong>Mission Control tab</strong></a> ·
+  <a href="#-solid_queue_guard-vs-mission-control"><strong>vs Mission Control</strong></a>
+</p>
+
+---
+
+Rails 8 ships with [Solid Queue](https://github.com/rails/solid_queue). Redis is optional. **Production config is not.**
 
 Your web tier can be **green** while your jobs are **dead**. Your queue can look **empty** while scheduled work is **stuck**. Your `queue.yml` can declare **10 threads** against a database pool of **5**.
 
-**solid_queue_guard** catches that *before* it becomes a 3am incident.
+**solid_queue_guard** catches that *before* it becomes an incident.
 
 > **Mission Control** shows what is happening.  
 > **solid_queue_guard** warns what is dangerous.
+
+### Install in 30 seconds
+
+```bash
+bundle add solid_queue_guard
+bin/rails solid_queue_guard:install
+bin/rails solid_queue_guard:doctor
+```
+
+---
+
+## Table of contents
+
+- [Why this exists](#why-this-exists)
+- [See it in action](#-see-it-in-action)
+- [What it checks](#what-it-checks)
+- [Quick start](#-quick-start)
+- [Mission Control dashboard](#-mission-control-dashboard-opt-in)
+- [How to use it](#how-to-use-it)
+- [Runtime process checks](#runtime-process-checks)
+- [Configuration](#configuration)
+- [Public API (v1.0+)](#public-api-v10)
+- [solid_queue_guard vs Mission Control](#-solid_queue_guard-vs-mission-control)
+- [Roadmap](#roadmap)
+- [Compatibility](#compatibility)
+- [Development](#development)
+- [Contributing](#contributing)
 
 ---
 
@@ -32,7 +76,7 @@ You don't need another dashboard. You need a **doctor**.
 
 ---
 
-## See it in action
+## 👨‍⚕️ See it in action
 
 ```bash
 bundle add solid_queue_guard
@@ -61,7 +105,7 @@ Suggested fixes:
 - Verify scheduler process is running in production
 ```
 
-One command. Actionable output. No Datadog required to get started.
+**One command. Actionable output. No Datadog required to get started.**
 
 ---
 
@@ -100,7 +144,7 @@ Runs locally, in CI, or pre-deploy. **No extra infrastructure.**
 
 ---
 
-## Quick start
+## 🚀 Quick start
 
 ### Install
 
@@ -176,7 +220,9 @@ config.unhealthy_http_status = 503  # default
 
 Works with **Kamal**, **Heroku**, **Fly.io**, **ECS/Fargate**, **Kubernetes**, **Better Stack**, **UptimeRobot**.
 
-### Mission Control dashboard (opt-in)
+---
+
+## 🛡️ Mission Control dashboard (opt-in)
 
 Add a **Guard** tab to [Mission Control — Jobs](https://github.com/rails/mission_control-jobs) — same Bulma UI, same auth, same navigation:
 
@@ -195,7 +241,9 @@ mount MissionControl::Jobs::Engine, at: "/jobs"
 mount SolidQueueGuard::Engine, at: "/solid_queue_guard" # keep /health for probes
 ```
 
-Open `/jobs/guard` (or click the **Guard** tab inside Mission Control). The page shows:
+Open `/jobs/guard` (or click the **Guard** tab inside Mission Control):
+
+![Guard tab in Mission Control — overall status, metrics, warnings, and checks table](docs/mission-control-guard-dashboard.png)
 
 | Section | Content |
 | ------- | ------- |
@@ -419,7 +467,7 @@ Breaking changes ship only in major versions (`2.0+`). Deprecations warn one min
 
 ---
 
-## solid_queue_guard vs Mission Control
+## ⚔️ solid_queue_guard vs Mission Control
 
 | | [Mission Control — Jobs](https://github.com/rails/mission_control-jobs) | solid_queue_guard |
 | --- | --- | --- |
