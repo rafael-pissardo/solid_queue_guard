@@ -12,7 +12,7 @@ module SolidQueueGuard
       private
 
       def guard_dashboard_path
-        ::MissionControl::Jobs::Engine.routes.url_helpers.solid_queue_guard_dashboard_path
+        application_solid_queue_guard_dashboard_path(@application)
       end
     end
   end

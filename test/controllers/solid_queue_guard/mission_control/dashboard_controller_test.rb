@@ -29,7 +29,7 @@ module SolidQueueGuard
       test 'guard dashboard renders health payload' do
         SolidQueueGuard::Health::Cache.stubs(:fetch).returns(DEGRADED_PAYLOAD)
 
-        get '/jobs/guard'
+        get guard_dashboard_path
 
         assert_response :success
         assert_includes response.body, 'Guard'
@@ -44,13 +44,32 @@ module SolidQueueGuard
       test 'guard dashboard includes guard tab in navigation' do
         SolidQueueGuard::Health::Cache.stubs(:fetch).returns(status: 'healthy', checks: [])
 
-        get '/jobs/guard'
+        get guard_dashboard_path
 
         assert_response :success
         assert_includes response.body, 'is-active'
-        assert_includes response.body, '/jobs/guard'
+        assert_includes response.body, guard_dashboard_path.split('?').first
       ensure
         SolidQueueGuard::Health::Cache.unstub(:fetch)
+      end
+
+      test 'guard dashboard navigation links use application scoped mission control paths' do
+        SolidQueueGuard::Health::Cache.stubs(:fetch).returns(status: 'healthy', checks: [])
+
+        get guard_dashboard_path
+
+        assert_response :success
+        assert_includes response.body, '/jobs/applications/dummy/queues'
+        assert_includes response.body, 'server_id=solid_queue'
+      ensure
+        SolidQueueGuard::Health::Cache.unstub(:fetch)
+      end
+
+      private
+
+      def guard_dashboard_path
+        application = ::MissionControl::Jobs.applications.first
+        "/jobs/applications/#{application.to_param}/guard?server_id=#{application.servers.first.to_param}"
       end
     end
   end

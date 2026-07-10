@@ -12,7 +12,7 @@ module SolidQueueGuard
 
         assert(
           ::MissionControl::Jobs::Engine.routes.routes.any? do |route|
-            route.name == 'solid_queue_guard_dashboard'
+            route.name == 'application_solid_queue_guard_dashboard'
           end
         )
       end

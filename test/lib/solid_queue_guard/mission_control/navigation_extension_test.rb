@@ -31,6 +31,10 @@ module SolidQueueGuard
           "/jobs/applications/#{application}/recurring_tasks"
         end
 
+        def application_solid_queue_guard_dashboard_path(application)
+          "/jobs/applications/#{application}/guard"
+        end
+
         def supported_job_statuses
           [:failed]
         end
@@ -55,7 +59,7 @@ module SolidQueueGuard
         sections = helper.navigation_sections
 
         assert_equal 'Guard', sections[:guard].first
-        assert_match(%r{/jobs/guard\z}, sections[:guard].last)
+        assert_match(%r{/jobs/applications/app/guard\z}, sections[:guard].last)
       end
     end
   end

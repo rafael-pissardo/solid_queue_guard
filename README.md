@@ -241,7 +241,7 @@ mount MissionControl::Jobs::Engine, at: "/jobs"
 mount SolidQueueGuard::Engine, at: "/solid_queue_guard" # keep /health for probes
 ```
 
-Open `/jobs/guard` (or click the **Guard** tab inside Mission Control):
+Open `/jobs/applications/:application_id/guard` (or click the **Guard** tab inside Mission Control):
 
 ![Guard tab in Mission Control — overall status, metrics, warnings, and checks table](docs/mission-control-guard-dashboard.png)
 
@@ -269,7 +269,7 @@ Solid Queue does not show up in Rails `/up`. **solid_queue_guard** gives you fou
 | **Doctor** | `bin/rails solid_queue_guard:doctor` | Local pre-deploy, config review |
 | **CI gate** | `SOLID_QUEUE_GUARD_STRICT=1 bin/rails solid_queue_guard:doctor` | Block merges with broken queue config |
 | **HTTP health** | `GET /solid_queue_guard/health` | Production uptime monitors (Kamal, ECS, UptimeRobot) |
-| **Guard tab** | `GET /jobs/guard` (with `integrate_mission_control`) | Human-readable checks inside Mission Control |
+| **Guard tab** | `GET /jobs/applications/:application_id/guard` (with `integrate_mission_control`) | Human-readable checks inside Mission Control |
 
 **Mission Control** shows what is happening. **solid_queue_guard** warns what is dangerous. Use both.
 
@@ -459,7 +459,7 @@ The following surface is **stable** until `2.0` and follows [semantic versioning
 | `solid_queue_guard:install:ci` | GitHub Actions workflow generator |
 | `mount SolidQueueGuard::Engine` | HTTP health endpoint |
 | `config.integrate_mission_control` | Guard tab in Mission Control (opt-in, requires `mission_control-jobs`) |
-| `GET /jobs/guard` | Human-readable health dashboard (when integration enabled) |
+| `GET /jobs/applications/:application_id/guard` | Human-readable health dashboard (when integration enabled) |
 
 Configuration attributes, rake tasks, health JSON shape, and Mission Control integration are public. Internal check classes and registry are `@api private`.
 
@@ -534,9 +534,9 @@ bundle exec appraisal rake test
 Release a new version after CI passes:
 
 ```bash
-# Tag must match lib/solid_queue_guard/version.rb (currently 1.1.3)
-git tag v1.1.3
-git push origin v1.1.3
+# Tag must match lib/solid_queue_guard/version.rb (currently 1.1.4)
+git tag v1.1.4
+git push origin v1.1.4
 ```
 
 Trusted Publishing on RubyGems publishes automatically when the tag is pushed.

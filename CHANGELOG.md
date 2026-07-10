@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.4] - 2026-07-10
+
+### Fixed
+
+- Mission Control Guard tab now uses application-scoped URLs (`/applications/:application_id/guard`) with the engine mount prefix and `server_id`, matching Queues, Workers, and Recurring tasks navigation
+
 ## [1.1.3] - 2026-07-09
 
 ### Fixed

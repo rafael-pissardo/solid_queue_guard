@@ -13,10 +13,10 @@ module SolidQueueGuard
           return if routes_installed?
 
           ::MissionControl::Jobs::Engine.routes.append do
-            get 'guard',
+            get 'applications/:application_id/guard',
                 controller: '/solid_queue_guard/mission_control/dashboard',
                 action: 'show',
-                as: :solid_queue_guard_dashboard
+                as: :application_solid_queue_guard_dashboard
           end
         end
 
@@ -31,7 +31,7 @@ module SolidQueueGuard
 
         def routes_installed?
           ::MissionControl::Jobs::Engine.routes.routes.any? do |route|
-            route.name == 'solid_queue_guard_dashboard'
+            route.name == 'application_solid_queue_guard_dashboard'
           end
         end
 
