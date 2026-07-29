@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-07-29
+
+### Changed
+
+- `process_heartbeat_config` no longer warns just because `process_heartbeat_interval` and
+  `process_alive_threshold` keep the Solid Queue defaults — the defaults now pass. The check
+  validates the relationship between the values instead: it fails when `process_alive_threshold`
+  is not above the heartbeat interval, and warns when the margin tolerates less than
+  `min_margin` heartbeats (default 2) or when Guard's `stale_process_threshold` is above
+  `process_alive_threshold`
+- `config.checks.process_heartbeat_config = { min_margin: 3 }` tunes the required margin
+
 ## [1.2.5] - 2026-07-10
 
 ### Fixed

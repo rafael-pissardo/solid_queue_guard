@@ -18,7 +18,7 @@ Disable any check via `config.disabled_checks = [:check_id]` or per-check `confi
 | `worker_coverage` | Queues with no worker assigned |
 | `scheduler_config` | `recurring.yml` tasks without a scheduler |
 | `env_flags` | `SOLID_QUEUE_SKIP_RECURRING=true` in production |
-| `process_heartbeat_config` | Default heartbeat thresholds may not fit deploy |
+| `process_heartbeat_config` | `process_alive_threshold` too close to the heartbeat interval |
 | `puma_colocated` | Solid Queue co-located with web in production |
 | `topology_recommendation` | `queue.yml` worker and pool recommendations |
 | `async_supervisor_config` | `async` mode with thread/pool sizing risks |
@@ -48,6 +48,27 @@ Disable any check via `config.disabled_checks = [:check_id]` or per-check `confi
 | Local `doctor` | Primary value | Partial without `bin/jobs` |
 | CI `--strict` | Primary value | Usually skip |
 | Production `/health` | When DB up | Primary value |
+
+## Config check details
+
+### `process_heartbeat_config`
+
+Solid Queue prunes a process once its heartbeat is older than `process_alive_threshold`
+and releases the executions it had claimed. The check compares the two values instead of
+flagging the Solid Queue defaults (`60.seconds` / `5.minutes`), which pass:
+
+| Condition | Status |
+| --------- | ------ |
+| `process_alive_threshold` <= `process_heartbeat_interval` | fail |
+| `process_alive_threshold` < `min_margin` x interval (default **2**) | warn |
+| Guard `stale_process_threshold` > `process_alive_threshold` | warn |
+
+The last one means Solid Queue deletes the dead process row before Guard would report it
+as stale, so `stale_process` never fires for pruned processes.
+
+```ruby
+config.checks.process_heartbeat_config = { min_margin: 3 }
+```
 
 ## Runtime check details
 
