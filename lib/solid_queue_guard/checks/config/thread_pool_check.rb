@@ -5,7 +5,7 @@ module SolidQueueGuard
     module Config
       class ThreadPoolCheck < Base
         def call
-          required_threads = solid_queue_configuration.send(:estimated_number_of_threads)
+          required_pool = ConfigurationSizing.estimated_database_pool_size(solid_queue_configuration)
           pool_size = SolidQueue::Record.connection_pool&.size
 
           return skip('thread_pool', 'Queue database connection pool is not available') if pool_size.nil?
@@ -17,18 +17,18 @@ module SolidQueueGuard
             )
           end.max || 1
 
-          if pool_size >= required_threads
+          if pool_size >= required_pool
             pass(
               'thread_pool',
               "Worker threads: #{max_worker_threads}, queue DB pool: #{pool_size}",
-              metadata: { threads: max_worker_threads, pool: pool_size, required: required_threads }
+              metadata: { threads: max_worker_threads, pool: pool_size, required: required_pool }
             )
           else
             failure(
               'thread_pool',
               "Worker threads: #{max_worker_threads}, queue DB pool: #{pool_size}",
-              suggestion: "Increase queue DB pool to at least #{required_threads} or reduce worker threads",
-              metadata: { threads: max_worker_threads, pool: pool_size, required: required_threads }
+              suggestion: "Increase queue DB pool to at least #{required_pool} or reduce worker threads",
+              metadata: { threads: max_worker_threads, pool: pool_size, required: required_pool }
             )
           end
         end
