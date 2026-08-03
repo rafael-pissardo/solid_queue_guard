@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-08-03
+
+### Changed
+
+- `recurring_stale` derives per-task thresholds from each task's schedule period
+  (`next_time - previous_time`, multiplied by `2` by default). Frequent crons alert sooner;
+  daily/weekly crons no longer force a single global window that hides shorter schedules.
+- `config.checks.recurring_stale = { threshold: ... }` is now a **fallback** when the schedule
+  period cannot be derived (not a global override for every task).
+- Optional `thresholds: { task_key: duration }` and `multiplier:` overrides for fine-tuning.
+
 ## [1.3.1] - 2026-07-31
 
 ### Fixed

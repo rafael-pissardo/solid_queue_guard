@@ -35,7 +35,7 @@ Disable any check via `config.disabled_checks = [:check_id]` or per-check `confi
 | `blocked_jobs` | Concurrency control silently holding jobs |
 | `orphaned_claims` | Jobs claimed but not finished |
 | `failed_jobs` | High failed job rate (1h window) |
-| `recurring_stale` | Recurring tasks that stopped firing |
+| `recurring_stale` | Recurring tasks that stopped firing (per-schedule threshold) |
 | `paused_queue_lag` | Lag on paused queues |
 | `pidfile` | Supervisor PID file present but process dead |
 | `finished_jobs_growth` | Unusual finished job table growth |
@@ -88,6 +88,23 @@ Looks at **presence of records**, not heartbeat freshness.
 ### `stale_process`
 
 Processes with `last_heartbeat_at` older than `stale_process_threshold` (default **5 minutes**).
+
+### `recurring_stale`
+
+Each static recurring task is evaluated against its own schedule period
+(`next_time - previous_time`), multiplied by `2` by default. A five-minute cron
+alerts after ~10 minutes; a daily cron after ~48 hours; a weekly cron after ~14 days.
+
+```ruby
+# Fallback when a task schedule cannot be derived:
+config.checks.recurring_stale = { threshold: 25.hours }
+
+# Optional tuning:
+config.checks.recurring_stale = {
+  multiplier: 2,
+  thresholds: { linkedin_run_import_job: 8.days }
+}
+```
 
 ### `queue_schema`
 

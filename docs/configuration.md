@@ -20,6 +20,8 @@ SolidQueueGuard.configure do |config|
   config.disabled_checks = [:pidfile]
   config.checks.queue_lag = { threshold: 10.minutes }
   config.checks.failed_jobs = { threshold: 5, enabled: true }
+  # recurring_stale uses each task's schedule by default; threshold is fallback only
+  # config.checks.recurring_stale = { threshold: 25.hours, multiplier: 2 }
 
   config.degraded_http_status = 207   # or :ok (200), 503, etc.
   config.unhealthy_http_status = 503
