@@ -51,7 +51,7 @@ module SolidQueueGuard
 
           assert_predicate result, :warn?
           assert_includes result.message, 'every_five_minutes'
-          refute_includes result.message, 'once_a_day'
+          assert_not_includes result.message, 'once_a_day'
         end
 
         test 'keeps weekly tasks fresh within two schedule periods' do
