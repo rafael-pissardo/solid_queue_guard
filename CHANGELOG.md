@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-08-04
+
+### Added
+
+- Operational Datadog metrics for Solid Queue depth and job events (opt-in):
+  - `config.emit_depth_metrics` — recurring gauges `solid_queue.ready.count`,
+    `solid_queue.ready.oldest_age_seconds`, `failed` / `claimed` / `scheduled` counts
+    via `SolidQueueGuard::Metrics::EmitDepthJob` (same DB source as Mission Control)
+  - `config.emit_event_metrics` — Active Job + Solid Queue lifecycle counters
+    (`solid_queue.jobs.*`, `solid_queue.job.duration_ms`, `solid_queue.process.active`)
+  - `config.statsd_service_name` (falls back to `DD_SERVICE` / `SOLID_QUEUE_GUARD_SERVICE`)
+  - Generator: `bin/rails generate solid_queue_guard:metrics` wires flags + `recurring.yml`
+- Requires optional gem `dogstatsd-ruby` (`Datadog::Statsd`). Distinct from
+  `config.metrics_backends` health-check export (`solid_queue.guard.*`).
+
 ## [1.4.0] - 2026-08-03
 
 ### Changed

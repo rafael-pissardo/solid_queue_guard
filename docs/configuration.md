@@ -33,6 +33,12 @@ SolidQueueGuard.configure do |config|
   config.notify_with = [:rails_logger, :slack, :datadog, :webhook]
   config.metrics_backends = [:statsd, :prometheus, :opentelemetry]
 
+  # Operational Datadog metrics (requires dogstatsd-ruby)
+  # Or run: bin/rails generate solid_queue_guard:metrics
+  config.emit_depth_metrics = true
+  config.emit_event_metrics = true
+  config.statsd_service_name = 'my-service' # or set DD_SERVICE
+
   config.on_status_change = lambda do |previous, current, report|
     # Called when /solid_queue_guard/health detects a status transition
     Rails.logger.info("[SolidQueueGuard] #{previous.inspect} -> #{current}")
@@ -61,7 +67,10 @@ Configuration is validated at boot (`config.validate!`). Invalid HTTP status val
 | `degraded_http_status` | `:ok` (200) | HTTP code when degraded |
 | `unhealthy_http_status` | `:service_unavailable` (503) | HTTP code when unhealthy |
 | `notify_with` | `[:rails_logger]` | Notification adapters on non-healthy CLI runs |
-| `metrics_backends` | `[]` | `:statsd`, `:prometheus`, `:opentelemetry` |
+| `metrics_backends` | `[]` | `:statsd`, `:prometheus`, `:opentelemetry` (guard health status only) |
+| `emit_depth_metrics` | `false` | Emit `solid_queue.ready.*` / failed / claimed / scheduled gauges via `EmitDepthJob` |
+| `emit_event_metrics` | `false` | Subscribe to Active Job + Solid Queue lifecycle → `solid_queue.jobs.*` counters |
+| `statsd_service_name` | `nil` | `service:` tag for DogStatsD (`DD_SERVICE` / `SOLID_QUEUE_GUARD_SERVICE` fallback) |
 | `on_status_change` | `nil` | Callback `(previous, current, report)` on health status transitions |
 
 ## Environment variables
@@ -75,17 +84,40 @@ Configuration is validated at boot (`config.validate!`). Invalid HTTP status val
 | `SOLID_QUEUE_GUARD_SLACK_WEBHOOK_URL` | Slack notifications |
 | `SOLID_QUEUE_GUARD_WEBHOOK_URL` | Generic webhook notifications |
 | `DD_API_KEY` | Datadog events API |
-| `SOLID_QUEUE_GUARD_STATSD_HOST` / `PORT` | StatsD target |
+| `SOLID_QUEUE_GUARD_STATSD_HOST` / `PORT` | StatsD target (guard health export) |
 | `SOLID_QUEUE_GUARD_PROMETHEUS_FILE` | Prometheus textfile path |
+| `DD_SERVICE` | Default `service:` tag for operational DogStatsD metrics |
+| `SOLID_QUEUE_GUARD_SERVICE` | Fallback `service:` tag when `DD_SERVICE` unset |
 
 ## Optional gem dependencies
 
 | Backend / notifier | Gem to add |
 | ------------------ | ---------- |
 | `:opentelemetry` metrics | `opentelemetry-sdk` |
-| Slack / webhook / Datadog | Uses stdlib `net/http` — no extra gem |
+| `emit_depth_metrics` / `emit_event_metrics` | `dogstatsd-ruby` |
+| Slack / webhook / Datadog events | Uses stdlib `net/http` — no extra gem |
 
-StatsD and Prometheus exporters use stdlib / file I/O and ship with the gem.
+Guard health StatsD/Prometheus exporters use stdlib / file I/O and ship with the gem.
+
+## Operational Datadog metrics
+
+Continuous depth gauges (same source as Mission Control) plus Active Job event counters:
+
+```bash
+bin/rails generate solid_queue_guard:metrics
+# adds flags to the initializer and emit_solid_queue_depth_metrics to recurring.yml
+```
+
+| Metric | Type | Notes |
+| ------ | ---- | ----- |
+| `solid_queue.ready.count` | gauge | per `queue:` tag; `0` when empty |
+| `solid_queue.ready.oldest_age_seconds` | gauge | lag of oldest ready job |
+| `solid_queue.failed.count` / `claimed.count` / `scheduled.count` | gauge | table counts |
+| `solid_queue.jobs.{enqueued,performed,enqueue_retry,retry_stopped,discard}` | counter | Active Job notifications |
+| `solid_queue.job.duration_ms` | timing | perform duration |
+| `solid_queue.process.active` | gauge | worker/dispatcher/scheduler lifecycle |
+
+Only emits in `production` / `staging`. Ensure workers consume `solid_queue_recurring`.
 
 ## HTTP health
 
