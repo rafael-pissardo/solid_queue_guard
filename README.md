@@ -124,6 +124,19 @@ Requires `mission_control-jobs` and an asset pipeline (Propshaft or Sprockets). 
 
 ---
 
+## Operational Datadog metrics
+
+Opt-in continuous depth gauges (same DB source as Mission Control) plus Active Job event counters:
+
+```bash
+bundle add dogstatsd-ruby
+bin/rails generate solid_queue_guard:metrics
+```
+
+Emits `solid_queue.ready.count`, `solid_queue.ready.oldest_age_seconds`, failed/claimed/scheduled counts, and `solid_queue.jobs.*` — see [docs/configuration.md](docs/configuration.md).
+
+---
+
 ## Public API (v1.0+)
 
 Stable until `2.0` — [semantic versioning](https://semver.org/):
@@ -135,6 +148,8 @@ Stable until `2.0` — [semantic versioning](https://semver.org/):
 | `solid_queue_guard:report` | Full diagnostic report |
 | `mount SolidQueueGuard::Engine` | HTTP health endpoint |
 | `config.integrate_mission_control` | Guard tab (requires `mission_control-jobs`) |
+| `config.emit_depth_metrics` / `emit_event_metrics` | Operational Datadog gauges/counters (requires `dogstatsd-ruby`) |
+| `bin/rails generate solid_queue_guard:metrics` | Wire depth recurring job + event flags |
 
 Internal check classes and registry are `@api private`.
 

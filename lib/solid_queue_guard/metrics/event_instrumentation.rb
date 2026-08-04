@@ -24,6 +24,12 @@ module SolidQueueGuard
         private
 
         def subscribe_active_job!
+          subscribe_enqueue!
+          subscribe_perform!
+          subscribe_retry_lifecycle!
+        end
+
+        def subscribe_enqueue!
           ActiveSupport::Notifications.subscribe('enqueue.active_job') do |event|
             job = event.payload.fetch(:job)
             DogstatsdClient.statsd.increment(
@@ -31,7 +37,9 @@ module SolidQueueGuard
               tags: DogstatsdClient.job_tags(job)
             )
           end
+        end
 
+        def subscribe_perform!
           ActiveSupport::Notifications.subscribe('perform.active_job') do |event|
             job = event.payload.fetch(:job)
             status = event.payload[:exception_object] || event.payload[:exception] ? 'error' : 'success'
@@ -40,7 +48,9 @@ module SolidQueueGuard
             DogstatsdClient.statsd.increment('solid_queue.jobs.performed', tags:)
             DogstatsdClient.statsd.timing('solid_queue.job.duration_ms', event.duration, tags:)
           end
+        end
 
+        def subscribe_retry_lifecycle!
           %w[enqueue_retry retry_stopped discard].each do |event_name|
             ActiveSupport::Notifications.subscribe("#{event_name}.active_job") do |event|
               job = event.payload.fetch(:job)

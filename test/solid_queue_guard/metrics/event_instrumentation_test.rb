@@ -7,12 +7,14 @@ module SolidQueueGuard
     class EventInstrumentationTest < ActiveSupport::TestCase
       setup do
         @original_emit = SolidQueueGuard.config.emit_event_metrics
+        @original_env = Rails.env
         EventInstrumentation.reset!
         DogstatsdClient.reset!
       end
 
       teardown do
         SolidQueueGuard.config.emit_event_metrics = @original_emit
+        Rails.stubs(:env).returns(@original_env)
         EventInstrumentation.reset!
         DogstatsdClient.reset!
       end

@@ -8,9 +8,12 @@ module SolidQueueGuard
       setup do
         @original_emit = SolidQueueGuard.config.emit_depth_metrics
         SolidQueueGuard.config.emit_depth_metrics = true
+        # Autoload SQ models while Rails.env is still `test` (connects_to is env-sensitive).
+        [SolidQueue::ReadyExecution, SolidQueue::FailedExecution,
+         SolidQueue::ClaimedExecution, SolidQueue::ScheduledExecution]
         @statsd = mock('statsd')
         DogstatsdClient.stubs(:statsd).returns(@statsd)
-        Rails.stubs(:env).returns(ActiveSupport::StringInquirer.new('production'))
+        DepthEmitter.stubs(:enabled?).returns(true)
       end
 
       teardown do
@@ -18,16 +21,24 @@ module SolidQueueGuard
         DogstatsdClient.reset!
       end
 
-      test 'emit! returns false when depth metrics disabled' do
+      test 'enabled? is false when depth metrics disabled' do
+        DepthEmitter.unstub(:enabled?)
         SolidQueueGuard.config.emit_depth_metrics = false
 
-        assert_equal false, DepthEmitter.emit!
+        assert_equal false, DepthEmitter.enabled?
       end
 
-      test 'emit! returns false outside production/staging' do
-        Rails.stubs(:env).returns(ActiveSupport::StringInquirer.new('test'))
+      test 'enabled? is false outside production/staging' do
+        DepthEmitter.unstub(:enabled?)
+        SolidQueueGuard.config.emit_depth_metrics = true
 
-        assert_equal false, DepthEmitter.emit!
+        assert_equal false, DepthEmitter.enabled?
+      end
+
+      test 'emit! returns false when not enabled' do
+        DepthEmitter.stubs(:enabled?).returns(false)
+
+        assert_nil DepthEmitter.emit!
       end
 
       test 'emit! sends zero gauges when ready queue is empty' do
@@ -44,7 +55,7 @@ module SolidQueueGuard
         @statsd.expects(:gauge).with('solid_queue.scheduled.count', 0)
         @statsd.expects(:flush)
 
-        assert DepthEmitter.emit!
+        DepthEmitter.emit!
       end
 
       test 'emit! sends per-queue ready depth and ages' do
@@ -73,7 +84,7 @@ module SolidQueueGuard
           @statsd.expects(:gauge).with('solid_queue.scheduled.count', 4)
           @statsd.expects(:flush)
 
-          assert DepthEmitter.emit!
+          DepthEmitter.emit!
         end
       end
     end

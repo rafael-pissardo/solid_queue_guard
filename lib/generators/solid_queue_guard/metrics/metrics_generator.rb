@@ -7,19 +7,19 @@ module SolidQueueGuard
     class MetricsGenerator < Rails::Generators::Base
       source_root File.expand_path('templates', __dir__)
 
-      RECURRING_SNIPPET = <<~YAML.freeze
+      RECURRING_SNIPPET = <<~YAML
         emit_solid_queue_depth_metrics:
           class: SolidQueueGuard::Metrics::EmitDepthJob
           queue: solid_queue_recurring
           schedule: every 15 seconds
       YAML
 
-      CONFIG_SNIPPET = <<~RUBY.freeze
+      CONFIG_SNIPPET = <<~RUBY
 
-          # Operational Datadog metrics (requires dogstatsd-ruby)
-          config.emit_depth_metrics = true
-          config.emit_event_metrics = true
-          # config.statsd_service_name = 'my-service' # or set DD_SERVICE
+        # Operational Datadog metrics (requires dogstatsd-ruby)
+        config.emit_depth_metrics = true
+        config.emit_event_metrics = true
+        # config.statsd_service_name = 'my-service' # or set DD_SERVICE
       RUBY
 
       desc 'Enables Solid Queue operational metrics (depth gauges + event counters) and wires recurring.yml'
@@ -82,7 +82,7 @@ module SolidQueueGuard
         indented = RECURRING_SNIPPET.lines.map { |line| line == "\n" ? line : "  #{line}" }.join
 
         if content.match?(/^default:/)
-          content.sub(/^(default:(?: &[\w]+)?\n(?:  .*\n)*)/) do |block|
+          content.sub(/^(default:(?: &\w+)?\n(?:  .*\n)*)/) do |block|
             "#{block.rstrip}\n#{indented}"
           end
         else

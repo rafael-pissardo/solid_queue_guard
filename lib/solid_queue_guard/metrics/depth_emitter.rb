@@ -8,12 +8,11 @@ module SolidQueueGuard
       module_function
 
       def emit!
-        return false unless enabled?
+        return unless enabled?
 
         emit_ready_gauges!
         emit_execution_gauges!
         statsd.flush if statsd.respond_to?(:flush)
-        true
       end
 
       def enabled?
