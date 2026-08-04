@@ -8,7 +8,7 @@ module SolidQueueGuard
         when 'healthy', 'pass' then 'is-success'
         when 'degraded', 'warn' then 'is-warning'
         when 'unhealthy', 'fail' then 'is-danger'
-        else 'is-light'
+        else 'is-dark' # skip / unknown — is-light is unreadable on Mission Control dark theme
         end
       end
 
