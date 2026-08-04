@@ -26,4 +26,10 @@ SolidQueueGuard.configure do |config|
   # config.on_status_change = ->(previous, current, report) { ... }
   # config.notify_with = [:rails_logger, :slack, :datadog, :webhook]
   # config.metrics_backends = [:statsd, :prometheus, :opentelemetry]
+
+  # Operational Datadog metrics (depth gauges + job event counters).
+  # Requires dogstatsd-ruby. Enable with: bin/rails generate solid_queue_guard:metrics
+  # config.emit_depth_metrics = true
+  # config.emit_event_metrics = true
+  # config.statsd_service_name = 'my-service' # or set DD_SERVICE
 end

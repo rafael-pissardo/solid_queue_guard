@@ -51,5 +51,11 @@ module SolidQueueGuard
         SolidQueueGuard::MissionControl::Integration.install_navigation!
       end
     end
+
+    initializer 'solid_queue_guard.event_metrics' do
+      config.after_initialize do
+        SolidQueueGuard::Metrics::EventInstrumentation.install!
+      end
+    end
   end
 end

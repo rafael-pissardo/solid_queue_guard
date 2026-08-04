@@ -22,7 +22,10 @@ module SolidQueueGuard
                   :checks,
                   :degraded_http_status,
                   :unhealthy_http_status,
-                  :on_status_change
+                  :on_status_change,
+                  :emit_depth_metrics,
+                  :emit_event_metrics,
+                  :statsd_service_name
 
     def initialize
       @enabled = true
@@ -42,6 +45,9 @@ module SolidQueueGuard
       @degraded_http_status = :ok
       @unhealthy_http_status = :service_unavailable
       @on_status_change = nil
+      @emit_depth_metrics = false
+      @emit_event_metrics = false
+      @statsd_service_name = nil
     end
 
     def validate!
