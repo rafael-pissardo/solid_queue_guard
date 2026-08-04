@@ -1,7 +1,7 @@
 <p align="center">
   <img src="https://img.shields.io/gem/v/solid_queue_guard?style=for-the-badge" alt="Gem Version">
   <img src="https://img.shields.io/badge/Ruby-3.1%2B-red?style=for-the-badge&logo=ruby" alt="Ruby 3.1+">
-  <img src="https://img.shields.io/badge/Rails-7.1–8.0-red?style=for-the-badge&logo=rubyonrails" alt="Rails 7.1–8.0">
+  <img src="https://img.shields.io/badge/Rails-7.1–8.x-red?style=for-the-badge&logo=rubyonrails" alt="Rails 7.1–8.x">
   <img src="https://img.shields.io/github/actions/workflow/status/rafael-pissardo/solid_queue_guard/ci.yml?branch=main&style=for-the-badge&label=CI" alt="CI">
   <img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge" alt="MIT License">
 </p>
@@ -15,9 +15,11 @@
 
 <p align="center">
   <a href="#-quick-start"><strong>Quick start</strong></a> ·
+  <a href="#-what-it-checks"><strong>What it checks</strong></a> ·
   <a href="docs/checks.md"><strong>Checks</strong></a> ·
   <a href="docs/configuration.md"><strong>Configuration</strong></a> ·
-  <a href="#-mission-control-dashboard"><strong>Mission Control</strong></a>
+  <a href="#-mission-control-dashboard"><strong>Mission Control</strong></a> ·
+  <a href="CHANGELOG.md"><strong>Changelog</strong></a>
 </p>
 
 ---
@@ -26,16 +28,8 @@ Rails 8 ships with [Solid Queue](https://github.com/rails/solid_queue). Redis is
 
 Your web tier can be **green** while your jobs are **dead**. **solid_queue_guard** catches that *before* it becomes an incident.
 
-> **Mission Control** shows what is happening.  
+> **Mission Control** shows what is happening.
 > **solid_queue_guard** warns what is dangerous.
-
-### Install in 30 seconds
-
-```bash
-bundle add solid_queue_guard
-bin/rails solid_queue_guard:install
-bin/rails solid_queue_guard:doctor
-```
 
 ---
 
@@ -48,6 +42,41 @@ bin/rails solid_queue_guard:doctor
 | "Recurring billing just… stopped" | Scheduler not running |
 | "Jobs hang after deploy" | Thread count > DB pool |
 | "Health check passes, jobs don't" | `/up` doesn't know Solid Queue exists |
+
+---
+
+## 🚀 Quick start
+
+```bash
+bundle add solid_queue_guard
+bin/rails solid_queue_guard:install
+bin/rails solid_queue_guard:doctor
+```
+
+```ruby
+# config/routes.rb
+mount SolidQueueGuard::Engine, at: "/solid_queue_guard"
+```
+
+```bash
+curl localhost:3000/solid_queue_guard/health
+SOLID_QUEUE_GUARD_STRICT=1 bin/rails solid_queue_guard:doctor   # CI gate
+bin/rails solid_queue_guard:report                              # config + runtime
+```
+
+Full options: [docs/configuration.md](docs/configuration.md)
+
+### Operational surfaces
+
+| Surface | Command / URL | Best for |
+| ------- | ------------- | -------- |
+| **Doctor** | `bin/rails solid_queue_guard:doctor` | Local pre-deploy, config review |
+| **CI gate** | `SOLID_QUEUE_GUARD_STRICT=1 bin/rails solid_queue_guard:doctor` | Block bad merges |
+| **Report** | `bin/rails solid_queue_guard:report` | Config + live queue DB |
+| **HTTP health** | `GET /solid_queue_guard/health` | Kamal, ECS, K8s, UptimeRobot |
+| **Guard tab** | `GET …/applications/:application_id/guard` | Human checks in Mission Control |
+
+CLI extras: `SOLID_QUEUE_GUARD_FORMAT=json`, `SOLID_QUEUE_GUARD_SCOPE=config|runtime|all`.
 
 ---
 
@@ -69,39 +98,15 @@ Suggested fixes:
 
 **One command. Actionable output. No Datadog required to get started.**
 
-Full check list: [docs/checks.md](docs/checks.md)
-
 ---
 
-## 🚀 Quick start
+## 🩺 What it checks
 
-```bash
-bundle add solid_queue_guard
-bin/rails solid_queue_guard:install
-bin/rails solid_queue_guard:doctor
-SOLID_QUEUE_GUARD_STRICT=1 bin/rails solid_queue_guard:doctor   # CI gate
-bin/rails solid_queue_guard:report                              # config + runtime
-```
+**Config** (pre-deploy / CI): adapter, queue DB, schema, thread vs pool sizing, worker coverage, scheduler/`recurring.yml`, env flags, Puma co-location, topology recommendations.
 
-```ruby
-# config/routes.rb
-mount SolidQueueGuard::Engine, at: "/solid_queue_guard"
-```
+**Runtime** (production health): queue lag, stale processes, missing roles (supervisor/worker/dispatcher/scheduler), failed jobs, recurring staleness, blocked/orphaned claims, paused-queue lag, pidfile, finished-jobs growth.
 
-```bash
-curl localhost:3000/solid_queue_guard/health
-```
-
-All configuration options: [docs/configuration.md](docs/configuration.md)
-
-### Operational surfaces
-
-| Surface | Command / URL | Best for |
-| ------- | ------------- | -------- |
-| **Doctor** | `bin/rails solid_queue_guard:doctor` | Local pre-deploy, config review |
-| **CI gate** | `SOLID_QUEUE_GUARD_STRICT=1 bin/rails solid_queue_guard:doctor` | Block bad merges |
-| **HTTP health** | `GET /solid_queue_guard/health` | Kamal, ECS, K8s, UptimeRobot |
-| **Guard tab** | `GET …/applications/:application_id/guard` | Human checks in Mission Control |
+Full ID list and thresholds: [docs/checks.md](docs/checks.md)
 
 ---
 
@@ -124,7 +129,9 @@ Requires `mission_control-jobs` and an asset pipeline (Propshaft or Sprockets). 
 
 ---
 
-## Operational Datadog metrics
+## Observability
+
+### Operational Datadog metrics
 
 Opt-in continuous depth gauges (same DB source as Mission Control) plus Active Job event counters:
 
@@ -134,6 +141,10 @@ bin/rails generate solid_queue_guard:metrics
 ```
 
 Emits `solid_queue.ready.count`, `solid_queue.ready.oldest_age_seconds`, failed/claimed/scheduled counts, and `solid_queue.jobs.*` — see [docs/configuration.md](docs/configuration.md).
+
+### Notifications & health export
+
+On non-healthy CLI runs you can notify via Rails logger, Slack, Datadog events, or a generic webhook (`config.notify_with`). Guard health status can also export to StatsD, Prometheus, or OpenTelemetry (`config.metrics_backends`).
 
 ---
 
@@ -146,10 +157,12 @@ Stable until `2.0` — [semantic versioning](https://semver.org/):
 | `SolidQueueGuard.configure` | Block-style configuration |
 | `solid_queue_guard:doctor` | Config readiness report |
 | `solid_queue_guard:report` | Full diagnostic report |
+| `solid_queue_guard:health` | Machine-readable JSON health |
 | `mount SolidQueueGuard::Engine` | HTTP health endpoint |
 | `config.integrate_mission_control` | Guard tab (requires `mission_control-jobs`) |
 | `config.emit_depth_metrics` / `emit_event_metrics` | Operational Datadog gauges/counters (requires `dogstatsd-ruby`) |
 | `bin/rails generate solid_queue_guard:metrics` | Wire depth recurring job + event flags |
+| `config.notify_with` / `metrics_backends` | CLI notifications and health-status export |
 
 Internal check classes and registry are `@api private`.
 
@@ -161,8 +174,9 @@ Internal check classes and registry are `@api private`.
 | --- | --- | --- |
 | **Purpose** | Inspect & manage jobs | Detect production risk |
 | **Config doctor** | No | Yes |
-| **Pre-deploy checks** | No | Yes |
+| **Pre-deploy / CI gate** | No | Yes |
 | **Queue lag alerts** | No | Yes |
+| **HTTP health for LBs** | No | Yes |
 
 **Use both.**
 
@@ -172,13 +186,17 @@ Internal check classes and registry are `@api private`.
 
 | Gem version | Ruby | Rails |
 | ----------- | ---- | ----- |
-| 1.2.x       | 3.1+ | 7.1, 7.2 |
-| 1.2.x       | 3.2+ | 8.0 |
-| 1.1.x       | 3.1+ | 7.1, 7.2, 8.0 |
-| 1.0.x       | 3.1+ | 7.1, 7.2, 8.0 |
+| 1.5.x       | 3.1+ | 7.1, 7.2 |
+| 1.5.x       | 3.2+ | 8.0+ |
+| 1.2.x–1.4.x | 3.1+ | 7.1, 7.2 |
+| 1.2.x–1.4.x | 3.2+ | 8.0 |
+| 1.0.x–1.1.x | 3.1+ | 7.1, 7.2, 8.0 |
 
 - [solid_queue](https://github.com/rails/solid_queue) >= 1.0, < 2.0
 - [mission_control-jobs](https://github.com/rails/mission_control-jobs) — optional
+- [dogstatsd-ruby](https://github.com/DataDog/dogstatsd-ruby) — optional (operational metrics)
+
+See [CHANGELOG.md](CHANGELOG.md) for release notes.
 
 ---
 
