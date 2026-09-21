@@ -14,7 +14,8 @@ Disable any check via `config.disabled_checks = [:check_id]` or per-check `confi
 | `queue_database` | Missing `queue` entry in `database.yml` |
 | `connects_to` | Solid Queue pointing at wrong DB / pool |
 | `queue_schema` | Missing Solid Queue tables in schema files or queue DB |
-| `thread_pool` | Worker `threads` > available queue DB connections |
+| `thread_pool` | Worker `threads` / `fibers` need more queue DB connections than available |
+| `fiber_worker_config` | Fiber workers without `async` or fiber-scoped isolation |
 | `worker_coverage` | Queues with no worker assigned |
 | `scheduler_config` | `recurring.yml` tasks without a scheduler |
 | `env_flags` | `SOLID_QUEUE_SKIP_RECURRING=true` in production |
@@ -50,6 +51,12 @@ Disable any check via `config.disabled_checks = [:check_id]` or per-check `confi
 | Production `/health` | When DB up | Primary value |
 
 ## Config check details
+
+### `fiber_worker_config`
+
+Fiber workers require Solid Queue 1.6+, the optional `async` gem, and
+`config.active_support.isolation_level = :fiber`. Thread workers skip these
+requirements.
 
 ### `process_heartbeat_config`
 
