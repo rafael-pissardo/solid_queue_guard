@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Fiber worker readiness check for Solid Queue 1.6: validates the optional `async`
+  dependency and fiber-scoped Active Support isolation.
+- Rails 8.1 Appraisal and CI coverage.
+
+### Changed
+
+- Database pool diagnostics now report fiber capacity when the largest worker uses
+  `fibers` instead of `threads`.
+
 ## [1.5.0] - 2026-08-04
 
 ### Added

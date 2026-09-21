@@ -10,6 +10,7 @@ module SolidQueueGuard
         Config::ConnectsToCheck,
         Config::QueueSchemaCheck,
         Config::ThreadPoolCheck,
+        Config::FiberWorkerConfigCheck,
         Config::WorkerCoverageCheck,
         Config::SchedulerConfigCheck,
         Config::EnvFlagsCheck,

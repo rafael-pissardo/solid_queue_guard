@@ -47,6 +47,10 @@ module SolidQueueGuard
           false
         end
 
+        def batches_supported?
+          false
+        end
+
         def jobs_count_with_status(_status)
           0
         end

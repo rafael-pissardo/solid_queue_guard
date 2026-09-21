@@ -27,6 +27,19 @@ module SolidQueueGuard
           assert_predicate result, :pass?
         end
 
+        test 'reports fiber capacity when fiber workers exceed the database pool' do
+          stub_required_pool(12)
+          SolidQueue::Configuration.any_instance.stubs(:workers_options).returns([{ fibers: 100 }])
+          SolidQueue::Record.connection_pool.stubs(:size).returns(5)
+
+          result = SolidQueueGuard::Checks::Config::ThreadPoolCheck.call
+
+          assert_predicate result, :fail?
+          assert_includes result.message, 'Worker fibers: 100'
+          assert_equal 100, result.metadata[:fibers]
+          assert_equal 12, result.metadata[:required]
+        end
+
         private
 
         def stub_required_pool(size)
